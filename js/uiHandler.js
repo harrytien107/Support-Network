@@ -63,10 +63,16 @@ class UIHandler {
 
   setupVLSMForm() {
     const form = document.getElementById("vlsm-form");
+    const baseNetworkInput = document.getElementById("base-network");
 
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       this.calculateVLSM();
+    });
+
+    // Add real-time validation feedback
+    baseNetworkInput.addEventListener("input", () => {
+      this.validateBaseNetworkInput();
     });
   }
 
@@ -120,15 +126,102 @@ class UIHandler {
     });
   }
 
+  // Performance check for detailed analysis
+  shouldGenerateDetailedAnalysis(baseNetwork, hostRequirements) {
+    const [baseIP, baseCIDR] = baseNetwork.split("/");
+    const baseCIDRNum = parseInt(baseCIDR);
+
+    // Limit detailed analysis for performance reasons
+    // If base network is too large (CIDR < 16), detailed analysis can be slow
+    if (baseCIDRNum < 16) {
+      return {
+        generate: false,
+        reason: "Detailed analysis is disabled for networks larger than /16 to prevent performance issues.",
+      };
+    }
+
+    // If any host requirement is too large (> 1000), detailed analysis can be slow
+    const maxHosts = Math.max(...hostRequirements);
+    if (maxHosts > 1000) {
+      return {
+        generate: false,
+        reason: "Detailed analysis is disabled when any subnet requires more than 1000 hosts to prevent performance issues.",
+      };
+    }
+
+    // Check total network size that would be processed
+    const totalRequiredHosts = hostRequirements.reduce((sum, hosts) => sum + hosts, 0);
+    if (totalRequiredHosts > 5000) {
+      return {
+        generate: false,
+        reason: "Detailed analysis is disabled when total host requirements exceed 5000 to prevent performance issues.",
+      };
+    }
+
+    return { generate: true };
+  }
+
+  validateBaseNetworkInput() {
+    const baseNetworkInput = document.getElementById("base-network");
+    const baseNetwork = baseNetworkInput.value.trim();
+
+    // Remove any existing validation feedback
+    const existingFeedback = baseNetworkInput.parentNode.querySelector(".validation-feedback");
+    if (existingFeedback) {
+      existingFeedback.remove();
+    }
+
+    // Reset input styling
+    baseNetworkInput.classList.remove("is-invalid", "is-warning");
+
+    if (baseNetwork && baseNetwork.includes("/")) {
+      const [baseIP, baseCIDR] = baseNetwork.split("/");
+      const baseCIDRNum = parseInt(baseCIDR);
+
+      if (!isNaN(baseCIDRNum)) {
+        let feedbackMessage = "";
+        let feedbackClass = "";
+
+        if (baseCIDRNum < 1 || baseCIDRNum > 32) {
+          feedbackMessage = "⚠️ CIDR must be between 1 and 32. Please enter a valid CIDR notation.";
+          feedbackClass = "is-invalid";
+        } else if (baseCIDRNum < 8) {
+          feedbackMessage = "⚠️ Networks larger than (smaller than /8) will take quite a while to process for performance reasons.";
+          feedbackClass = "is-invalid";
+        } else if (baseCIDRNum < 16) {
+          feedbackMessage = "⚠️ Large networks (smaller than /16) will have disabled detailed analysis for performance reasons.";
+          feedbackClass = "is-warning";
+        } else if (baseCIDRNum < 20) {
+          feedbackMessage = "⚠️ Large networks (smaller than /20) may have limited detailed analysis.";
+          feedbackClass = "is-warning";
+        }
+
+        if (feedbackMessage) {
+          if(baseCIDRNum < 1 || baseCIDRNum > 32)
+            baseNetworkInput.classList.add(feedbackClass);
+          const feedback = document.createElement("div");
+          feedback.className = `validation-feedback ${feedbackClass === "is-invalid" ? "invalid" : "warning"}-feedback d-block`;
+          feedback.innerHTML = feedbackMessage;
+          baseNetworkInput.parentNode.appendChild(feedback);
+        }
+      } else {
+        // Handle case where CIDR is not a valid number
+        baseNetworkInput.classList.add("is-invalid");
+        const feedback = document.createElement("div");
+        feedback.className = "validation-feedback invalid-feedback d-block";
+        feedback.innerHTML = "⚠️ Invalid CIDR format. Please enter a number between 1 and 32.";
+        baseNetworkInput.parentNode.appendChild(feedback);
+      }
+    }
+  }
+
   async calculateVLSM() {
     const baseNetwork = document.getElementById("base-network").value.trim();
     const strategy = document.getElementById("subdivision-strategy").value; // Get selected strategy
     const subnetInputs = document.querySelectorAll(".subnet-hosts");
     const resultsDiv = document.getElementById("vlsm-results");
-    const tableBody = document.getElementById("vlsm-table-body");
 
-    // Clear previous results
-    tableBody.innerHTML = "";
+    // Hide previous results (don't clear innerHTML yet, in case we need to show error)
     resultsDiv.style.display = "none";
 
     try {
@@ -146,6 +239,14 @@ class UIHandler {
         throw new Error("Invalid base network format. Please use CIDR notation (e.g., 192.168.1.0/24)");
       }
 
+      // Additional validation for CIDR range
+      const [baseIP, baseCIDR] = baseNetwork.split("/");
+      const baseCIDRNum = parseInt(baseCIDR);
+
+      if (isNaN(baseCIDRNum) || baseCIDRNum < 1 || baseCIDRNum > 32) {
+        throw new Error("Invalid CIDR value. CIDR must be a number between 1 and 32.");
+      }
+
       // Collect host requirements
       const hostRequirements = [];
       subnetInputs.forEach((input, index) => {
@@ -157,6 +258,18 @@ class UIHandler {
 
       if (hostRequirements.length === 0) {
         throw new Error("Please specify at least one host requirement");
+      }
+
+      // Check for host requirements that are too large
+      const maxHosts = Math.max(...hostRequirements);
+      if (maxHosts > 16777214) {
+        // Maximum hosts for /8 network
+        throw new Error(`Host requirement too large: ${maxHosts}. Maximum supported is 16,777,214 hosts.`);
+      }
+
+      // Warn about performance for very large host requirements
+      if (maxHosts > 65534) {
+        console.warn("Large host requirements detected. This may affect performance.");
       }
 
       // Calculate VLSM with selected strategy
@@ -184,14 +297,52 @@ class UIHandler {
 
   displayVLSMResults(results, baseNetwork, hostRequirements, strategy = "first") {
     const resultsDiv = document.getElementById("vlsm-results");
+
+    // Check if detailed analysis should be generated
+    const detailedAnalysisCheck = this.shouldGenerateDetailedAnalysis(baseNetwork, hostRequirements);
+
+    // Recreate the entire results structure to ensure it's clean
+    resultsDiv.innerHTML = `
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="text-primary mb-0"><i class="fas fa-check-circle me-2"></i>Subnetting Results</h5>
+        <div class="btn-group" role="group">
+          <input type="radio" class="btn-check" name="viewMode" id="table-view" value="table" checked />
+          <label class="btn btn-outline-primary btn-sm" for="table-view"> <i class="fas fa-table me-1"></i>Table View </label>
+          <input type="radio" class="btn-check" name="viewMode" id="detailed-view" value="detailed" ${!detailedAnalysisCheck.generate ? "disabled" : ""} />
+          <label class="btn btn-outline-primary btn-sm ${!detailedAnalysisCheck.generate ? "disabled" : ""}" for="detailed-view"> 
+            <i class="fas fa-list-alt me-1"></i>Detailed Analysis ${!detailedAnalysisCheck.generate ? "(Disabled)" : ""}
+          </label>
+        </div>
+      </div>
+
+      <!-- Table View -->
+      <div id="table-view-content">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead class="table-primary">
+              <tr>
+                <th>Network</th>
+                <th>IP Network</th>
+                <th>First IP</th>
+                <th>Last IP</th>
+                <th>Broadcast</th>
+                <th>Subnet Mask</th>
+                <th>Wildcard Mask</th>
+                <th>Usable Hosts</th>
+              </tr>
+            </thead>
+            <tbody id="vlsm-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Detailed Analysis View -->
+      <div id="detailed-view-content" style="display: none;">
+        <div id="detailed-analysis" class="bg-light p-4 rounded"></div>
+      </div>
+    `; // Now get the new elements after recreating the structure
     const tableBody = document.getElementById("vlsm-table-body");
     const detailedAnalysisDiv = document.getElementById("detailed-analysis");
-
-    // Clear previous results
-    tableBody.innerHTML = "";
-    if (detailedAnalysisDiv) {
-      detailedAnalysisDiv.innerHTML = "";
-    }
 
     // Populate table view
     results.forEach((subnet, index) => {
@@ -216,15 +367,35 @@ class UIHandler {
       tableBody.appendChild(row);
     });
 
-    // Generate detailed analysis with strategy
+    // Generate detailed analysis with strategy (only if performance allows)
     if (detailedAnalysisDiv && baseNetwork && hostRequirements) {
-      try {
-        const detailedAnalysis = generateDetailedAnalysis(baseNetwork, hostRequirements, results, strategy);
-        detailedAnalysisDiv.innerHTML = detailedAnalysis;
-      } catch (error) {
-        detailedAnalysisDiv.innerHTML = `<p class="text-danger">Error generating detailed analysis: ${error.message}</p>`;
+      if (detailedAnalysisCheck.generate) {
+        try {
+          const detailedAnalysis = generateDetailedAnalysis(baseNetwork, hostRequirements, results, strategy);
+          detailedAnalysisDiv.innerHTML = detailedAnalysis;
+        } catch (error) {
+          detailedAnalysisDiv.innerHTML = `<p class="text-danger">Error generating detailed analysis: ${error.message}</p>`;
+        }
+      } else {
+        // Show performance warning instead of detailed analysis
+        detailedAnalysisDiv.innerHTML = `
+          <div class="alert alert-warning">
+            <h6 class="alert-heading">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              Detailed Analysis Disabled
+            </h6>
+            <p class="mb-0">${detailedAnalysisCheck.reason}</p>
+            <hr>
+            <p class="mb-0 small">
+              <strong>Suggestion:</strong> Use a smaller base network (CIDR ≥ /20) or reduce the number of required hosts per subnet to enable detailed analysis.
+            </p>
+          </div>
+        `;
       }
     }
+
+    // Re-setup view mode toggle after recreating the structure
+    this.setupViewModeToggle();
 
     resultsDiv.style.display = "block";
     resultsDiv.classList.add("fade-in");
@@ -234,8 +405,7 @@ class UIHandler {
     const ipCidrInput = document.getElementById("ip-cidr-input").value.trim();
     const resultsDiv = document.getElementById("ip-checker-results");
 
-    // Clear previous results
-    resultsDiv.innerHTML = "";
+    // Hide previous results
     resultsDiv.style.display = "none";
 
     try {
@@ -344,8 +514,7 @@ class UIHandler {
     const ipListText = document.getElementById("ip-list").value.trim();
     const resultsDiv = document.getElementById("ip-aggregator-results");
 
-    // Clear previous results
-    resultsDiv.innerHTML = "";
+    // Hide previous results
     resultsDiv.style.display = "none";
 
     try {
@@ -521,7 +690,8 @@ class UIHandler {
       });
 
       detailedViewRadio.addEventListener("change", () => {
-        if (detailedViewRadio.checked) {
+        // Only switch if the radio is not disabled
+        if (detailedViewRadio.checked && !detailedViewRadio.disabled) {
           this.switchToDetailedView();
         }
       });
