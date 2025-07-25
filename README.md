@@ -134,25 +134,30 @@ npm run deploy
 ## 📁 Project Structure
 
 ```
-├── js/                     # Core networking logic modules
-│   ├── binaryMap.js       # Binary/decimal conversion utilities
-│   ├── ipAggregator.js    # IP aggregation and supernetting logic
-│   ├── ipChecker.js       # IP address validation and analysis
-│   ├── uiHandler.js       # User interface event handlers
-│   └── vlsmLogic.js       # VLSM calculation algorithms
-├── src/                   # React TypeScript source code
-│   ├── App.tsx           # Main application component
-│   ├── main.tsx          # Application entry point
-│   ├── index.css         # Global styles and Tailwind imports
-│   └── vite-env.d.ts     # TypeScript environment declarations
-├── index.html            # HTML template with Bootstrap integration
-├── style.css             # Custom styles and component styling
-├── package.json          # Project dependencies and npm scripts
-├── vite.config.ts        # Vite bundler configuration
-├── tailwind.config.js    # Tailwind CSS configuration
-├── postcss.config.js     # PostCSS configuration for Tailwind
-├── eslint.config.js      # ESLint rules and configuration
-└── tsconfig.json         # TypeScript compiler configuration
+├── js/                  # Core networking logic modules
+│   ├── binaryMap.js     # Binary/decimal conversion utilities
+│   ├── ipAggregator.js  # IP aggregation and supernetting logic
+│   ├── ipChecker.js     # IP address validation and analysis
+│   ├── uiHandler.js     # User interface event handlers
+│   └── vlsmLogic.js     # VLSM calculation algorithms
+├── src/                 # React TypeScript source code
+│   ├── App.tsx          # Main application component
+│   ├── main.tsx         # Application entry point
+│   ├── index.css        # Global styles and Tailwind imports
+│   └── vite-env.d.ts    # TypeScript environment declarations
+├── .gitignore           # Git ignore file for excluding files from version control
+├── eslint.config.js     # ESLint configuration for code linting rules
+├── index.html           # HTML template with Bootstrap integration
+├── package-lock.json    # Auto-generated dependency lock file
+├── package.json         # Project dependencies and npm scripts
+├── postcss.config.js    # PostCSS configuration for Tailwind processing
+├── README.md            # Project documentation (this file)
+├── style.css            # Custom styles and component styling
+├── tailwind.config.js   # Tailwind CSS configuration and customization
+├── tsconfig.app.json    # TypeScript config for application code
+├── tsconfig.json        # Main TypeScript compiler configuration
+├── tsconfig.node.json   # TypeScript config for Node.js build tools
+└── vite.config.ts       # Vite bundler configuration and plugins
 ```
 
 ## 🔧 Available Scripts
