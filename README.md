@@ -8,64 +8,6 @@ A comprehensive web application for network administrators and engineers, featur
 
 The application is deployed and running live on GitHub Pages. You can access all features directly in your browser without any installation.
 
-## 🇻🇳 Tiếng Việt / Vietnamese Translation
-
-<details>
-<summary>Click here for Vietnamese translation / Nhấp vào đây để xem bản dịch tiếng Việt</summary>
-
-### Bộ Công Cụ Mạng (Network Tools Suite)
-
-Ứng dụng web toàn diện dành cho các quản trị viên mạng và kỹ sư, có các tính năng quản lý địa chỉ IP nâng cao, tính toán subnet và các công cụ phân tích mạng. Được xây dựng với các công nghệ web hiện đại bao gồm React, TypeScript và Vite.
-
-#### 🌐 Tính Năng Chính
-
-- **Máy Tính VLSM**: Tính toán subnet nâng cao với kích thước subnet tùy chỉnh
-- **Kiểm Tra & Phân Tích IP**: Công cụ kiểm tra và xác thực địa chỉ IP toàn diện
-- **Tổng Hợp IP & Supernetting**: Tự động tóm tắt route và tổng hợp mạng
-- **Chuyển Đổi Binary/Decimal**: Chuyển đổi giữa các hệ số khác nhau cho mạng
-- **Lập Kế Hoạch Subnet**: Lập kế hoạch và tối ưu hóa topology mạng
-- **Phân Tích Dải Mạng**: Phân tích dải IP, tính toán host có thể sử dụng
-
-#### 🎯 Người Dùng Mục Tiêu
-
-- **Kỹ Sư Mạng**: Đơn giản hóa tính toán subnet hàng ngày và lập kế hoạch mạng
-- **Quản Trị Hệ Thống**: Xác thực cấu hình IP và lập kế hoạch mở rộng mạng
-- **Sinh Viên & Giáo Viên**: Học các khái niệm mạng với các công cụ tương tác
-- **Chuyên Gia IT**: Tham khảo nhanh cho khắc phục sự cố và thiết kế mạng
-
-#### 💡 Lợi Ích Chính
-
-- **Không Cần Cài Đặt**: Công cụ dựa trên trình duyệt, truy cập mọi nơi
-- **Tính Toán Thời Gian Thực**: Kết quả tức thì với giao diện tương tác
-- **Giá Trị Giáo Dục**: Biểu diễn trực quan giúp hiểu khái niệm mạng
-- **Cấp Độ Chuyên Nghiệp**: Tính toán chính xác phù hợp cho môi trường sản xuất
-- **Thân Thiện Di Động**: Thiết kế responsive hoạt động trên tất cả thiết bị
-
-#### 🚀 Công Nghệ Sử Dụng
-
-- **React 18** - Thư viện UI hiện đại với hooks và functional components
-- **TypeScript** - JavaScript an toàn kiểu cho trải nghiệm phát triển tốt hơn
-- **Vite** - Build tool và development server siêu nhanh
-- **Tailwind CSS** - CSS framework utility-first cho styling nhanh
-- **Bootstrap 5** - UI components bổ sung và responsive grid
-- **Lucide React** - Thư viện icon đẹp và nhất quán
-
-#### 🛠️ Hướng Dẫn Cài Đặt
-
-1. **Clone Repository**: `git clone https://github.com/Glasspham/Support-Network.git`
-2. **Cài Đặt Dependencies**: `npm install`
-3. **Chạy Development Server**: `npm run dev`
-4. **Truy Cập**: Mở `http://localhost:5173` trong trình duyệt
-
-#### 🔧 Lệnh Có Sẵn
-
-- `npm run dev` - Khởi động development server với hot reload
-- `npm run build` - Tạo production build được tối ưu hóa
-- `npm run preview` - Xem trước production build tại local
-- `npm run lint` - Chạy ESLint để kiểm tra chất lượng code
-
-</details>
-
 ## 📋 Project Description
 
 The Network Tools Suite is a powerful, browser-based application designed to simplify complex networking tasks. This project provides a suite of tools for:
