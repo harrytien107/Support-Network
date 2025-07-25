@@ -20,6 +20,7 @@ class UIHandler {
     this.setupIPAggregatorForm();
     this.setupDynamicSubnets();
     this.setupViewModeToggle();
+    this.setupThemeToggle();
   }
 
   setupNavigation() {
@@ -121,6 +122,7 @@ class UIHandler {
 
   async calculateVLSM() {
     const baseNetwork = document.getElementById("base-network").value.trim();
+    const strategy = document.getElementById("subdivision-strategy").value; // Get selected strategy
     const subnetInputs = document.querySelectorAll(".subnet-hosts");
     const resultsDiv = document.getElementById("vlsm-results");
     const tableBody = document.getElementById("vlsm-table-body");
@@ -157,11 +159,11 @@ class UIHandler {
         throw new Error("Please specify at least one host requirement");
       }
 
-      // Calculate VLSM
-      const results = calculateVLSM(baseNetwork, hostRequirements);
+      // Calculate VLSM with selected strategy
+      const results = calculateVLSM(baseNetwork, hostRequirements, strategy);
 
       // Display results
-      this.displayVLSMResults(results, baseNetwork, hostRequirements);
+      this.displayVLSMResults(results, baseNetwork, hostRequirements, strategy);
 
       // Restore button state
       if (submitBtn) {
@@ -180,7 +182,7 @@ class UIHandler {
     }
   }
 
-  displayVLSMResults(results, baseNetwork, hostRequirements) {
+  displayVLSMResults(results, baseNetwork, hostRequirements, strategy = "first") {
     const resultsDiv = document.getElementById("vlsm-results");
     const tableBody = document.getElementById("vlsm-table-body");
     const detailedAnalysisDiv = document.getElementById("detailed-analysis");
@@ -207,16 +209,17 @@ class UIHandler {
                 <td><strong>${subnet.lastIP}</strong></td>
                 <td><strong>${subnet.broadcast}</strong></td>
                 <td><strong>${subnet.subnetMask}</strong></td>
+                <td><strong>${subnet.wildcardMask}</strong></td>
                 <td><span class="badge bg-success">${subnet.usableHosts}</span></td>
             `;
 
       tableBody.appendChild(row);
     });
 
-    // Generate detailed analysis
+    // Generate detailed analysis with strategy
     if (detailedAnalysisDiv && baseNetwork && hostRequirements) {
       try {
-        const detailedAnalysis = generateDetailedAnalysis(baseNetwork, hostRequirements, results);
+        const detailedAnalysis = generateDetailedAnalysis(baseNetwork, hostRequirements, results, strategy);
         detailedAnalysisDiv.innerHTML = detailedAnalysis;
       } catch (error) {
         detailedAnalysisDiv.innerHTML = `<p class="text-danger">Error generating detailed analysis: ${error.message}</p>`;
@@ -313,6 +316,7 @@ class UIHandler {
                                 <li><strong>IP Address:</strong> ${result.ipAddress}</li>
                                 <li><strong>Subnet:</strong> ${result.networkAddress}/${result.cidr}</li>
                                 <li><strong>Subnet Mask:</strong> ${result.subnetInput.startsWith("/") || !isNaN(result.subnetInput) ? this.cidrToMask(result.cidr) : result.subnetInput}</li>
+                                <li><strong>Wildcard Mask:</strong> ${result.wildcardMask}</li>
                             </ul>
                         </div>
                     </div>
@@ -413,12 +417,10 @@ class UIHandler {
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <h6><i class="fas fa-network-wired me-2"></i>Aggregated Network</h6>
-                        <div class="result-item ip-result-info">
-                            <div class="h4 mb-2 text-success">${result.aggregatedNetwork}</div>
+                        <div class="result-item ip-result-success">
+                            <div class="h4 mb-2">${result.aggregatedNetwork}</div>
                             <ul class="list-unstyled mb-0">
                                 <li><strong>Broadcast:</strong> ${result.broadcastAddress}</li>
-                                <li><strong>Total Hosts:</strong> <span class="badge bg-info">${result.totalHosts.toLocaleString()}</span></li>
-                                <li><strong>Usable Hosts:</strong> <span class="badge bg-info">${result.usableHosts.toLocaleString()}</span></li>
                                 <li><strong>Common Prefix:</strong> /${result.commonPrefixLength}</li>
                             </ul>
                         </div>
@@ -544,6 +546,57 @@ class UIHandler {
       tableViewContent.style.display = "none";
       detailedViewContent.style.display = "block";
     }
+  }
+
+  setupThemeToggle() {
+    // Check for saved theme preference or default to light mode
+    const savedTheme = localStorage.getItem("theme") || "light";
+    this.setTheme(savedTheme);
+
+    // Theme toggle button event listener
+    const themeToggle = document.getElementById("theme-toggle");
+    if (themeToggle) {
+      themeToggle.addEventListener("click", () => {
+        const currentTheme = document.documentElement.getAttribute("data-theme");
+        const newTheme = currentTheme === "dark" ? "light" : "dark";
+        this.setTheme(newTheme);
+      });
+    }
+  }
+
+  setTheme(theme) {
+    // Set theme attribute on document element
+    document.documentElement.setAttribute("data-theme", theme);
+
+    // Save theme preference
+    localStorage.setItem("theme", theme);
+
+    // Update body class for Bootstrap compatibility
+    if (theme === "dark") {
+      document.body.classList.remove("bg-light");
+      document.body.classList.add("bg-dark", "text-light");
+    } else {
+      document.body.classList.remove("bg-dark", "text-light");
+      document.body.classList.add("bg-light");
+    }
+
+    // Update Bootstrap components for dark mode
+    this.updateBootstrapComponentsForTheme(theme);
+  }
+
+  updateBootstrapComponentsForTheme(theme) {
+    // CHỈ thay đổi table thành dark mode, giữ nguyên TẤT CẢ màu khác
+    const tables = document.querySelectorAll(".table");
+    tables.forEach((table) => {
+      if (theme === "dark") {
+        table.classList.add("table-dark");
+      } else {
+        table.classList.remove("table-dark");
+      }
+    });
+
+    // KHÔNG thay đổi navbar, card headers, alerts - để CSS xử lý
+    // Giữ nguyên bg-info, bg-primary, và tất cả màu Bootstrap
   }
 }
 

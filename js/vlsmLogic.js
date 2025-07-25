@@ -2,7 +2,7 @@
  * VLSM Logic - Variable Length Subnet Masking calculations
  */
 
-import { cidrToSubnetMask, getUsableHosts } from "./binaryMap.js";
+import { cidrToSubnetMask, getUsableHosts, cidrToWildcardMask } from "./binaryMap.js";
 
 /**
  * Parse IP address string to array of integers
@@ -108,7 +108,7 @@ function findSuitableCIDR(requiredHosts) {
  * @param {Array} sortedRequirements - Requirements sorted by hosts (descending)
  * @returns {Object} - Contains results and allocation steps
  */
-function performVLSMAllocation(baseNetwork, sortedRequirements) {
+function performVLSMAllocation(baseNetwork, sortedRequirements, strategy = "first") {
   const results = [];
   const allocationSteps = []; // Track each allocation step for analysis
 
@@ -171,6 +171,7 @@ function performVLSMAllocation(baseNetwork, sortedRequirements) {
       parentCIDR: parentCIDR,
       targetCIDR: subnetCIDR,
       availableNetworksBefore: [...availableNetworks],
+      strategy: strategy,
     };
 
     // If we need to subdivide the parent network
@@ -178,10 +179,19 @@ function performVLSMAllocation(baseNetwork, sortedRequirements) {
       // Generate all subnets from this parent
       const allSubnets = generateSubnetDivision(bestParent.network, subnetCIDR);
 
-      // Assign the last subnet to this requirement
-      const assignedSubnet = allSubnets[allSubnets.length - 1];
+      // Choose subnet based on strategy
+      let assignedSubnetIndex;
+      if (strategy === "last") {
+        // Assign the last subnet to this requirement
+        assignedSubnetIndex = allSubnets.length - 1;
+      } else {
+        // Default: assign the first subnet (.0 network)
+        assignedSubnetIndex = 0;
+      }
+
+      const assignedSubnet = allSubnets[assignedSubnetIndex];
       allocationStep.allSubnets = allSubnets;
-      allocationStep.assignedSubnetIndex = allSubnets.length - 1;
+      allocationStep.assignedSubnetIndex = assignedSubnetIndex;
 
       // Calculate subnet details
       const [networkIP, cidrStr] = assignedSubnet.network.split("/");
@@ -189,6 +199,7 @@ function performVLSMAllocation(baseNetwork, sortedRequirements) {
       const firstIP = getFirstUsableIP(networkIP);
       const lastIP = getLastUsableIP(broadcastIP);
       const subnetMask = cidrToSubnetMask(subnetCIDR);
+      const wildcardMask = cidrToWildcardMask(subnetCIDR);
       const usableHosts = getUsableHosts(subnetCIDR);
 
       results.push({
@@ -198,6 +209,7 @@ function performVLSMAllocation(baseNetwork, sortedRequirements) {
         lastIP: `${lastIP}/${subnetCIDR}`,
         broadcast: `${broadcastIP}/${subnetCIDR}`,
         subnetMask: subnetMask,
+        wildcardMask: wildcardMask,
         usableHosts: usableHosts,
         requiredHosts: requiredHosts,
         cidr: subnetCIDR,
@@ -209,8 +221,10 @@ function performVLSMAllocation(baseNetwork, sortedRequirements) {
       availableNetworks.splice(bestParentIndex, 1);
 
       // Add all subnets except the assigned one as available
-      for (let k = 0; k < allSubnets.length - 1; k++) {
-        availableNetworks.push({ network: allSubnets[k].network, used: false });
+      for (let k = 0; k < allSubnets.length; k++) {
+        if (k !== assignedSubnetIndex) {
+          availableNetworks.push({ network: allSubnets[k].network, used: false });
+        }
       }
     } else {
       // Direct assignment (parent CIDR matches required CIDR)
@@ -222,6 +236,7 @@ function performVLSMAllocation(baseNetwork, sortedRequirements) {
       const firstIP = getFirstUsableIP(networkIP);
       const lastIP = getLastUsableIP(broadcastIP);
       const subnetMask = cidrToSubnetMask(subnetCIDR);
+      const wildcardMask = cidrToWildcardMask(subnetCIDR);
       const usableHosts = getUsableHosts(subnetCIDR);
 
       results.push({
@@ -231,6 +246,7 @@ function performVLSMAllocation(baseNetwork, sortedRequirements) {
         lastIP: `${lastIP}/${subnetCIDR}`,
         broadcast: `${broadcastIP}/${subnetCIDR}`,
         subnetMask: subnetMask,
+        wildcardMask: wildcardMask,
         usableHosts: usableHosts,
         requiredHosts: requiredHosts,
         cidr: subnetCIDR,
@@ -273,7 +289,7 @@ function performVLSMAllocation(baseNetwork, sortedRequirements) {
  * @param {number[]} hostRequirements - Array of host requirements for each subnet
  * @returns {Object[]} - Array of subnet information objects
  */
-export function calculateVLSM(baseNetwork, hostRequirements) {
+export function calculateVLSM(baseNetwork, hostRequirements, strategy = "first") {
   // Parse base network
   const [baseIP, baseCIDR] = baseNetwork.split("/");
   const baseCIDRNum = parseInt(baseCIDR);
@@ -305,7 +321,7 @@ export function calculateVLSM(baseNetwork, hostRequirements) {
   const sortedRequirements = [...validRequirements].sort((a, b) => b.hosts - a.hosts);
 
   try {
-    const { results } = performVLSMAllocation(baseNetwork, sortedRequirements);
+    const { results } = performVLSMAllocation(baseNetwork, sortedRequirements, strategy);
 
     // Sort results by CIDR (smaller CIDR first, i.e., /25 before /26)
     results.sort((a, b) => a.cidr - b.cidr);
@@ -323,7 +339,7 @@ export function calculateVLSM(baseNetwork, hostRequirements) {
  * @param {Object[]} results - VLSM calculation results
  * @returns {string} - Detailed analysis in HTML format
  */
-export function generateDetailedAnalysis(baseNetwork, hostRequirements, results) {
+export function generateDetailedAnalysis(baseNetwork, hostRequirements, results, strategy = "first") {
   const [baseIP, baseCIDR] = baseNetwork.split("/");
   const baseCIDRNum = parseInt(baseCIDR);
 
@@ -341,6 +357,16 @@ export function generateDetailedAnalysis(baseNetwork, hostRequirements, results)
 
   analysis += `</ul>`;
   analysis += `<p><strong>Find the first address, last address and broadcast address for each subnet?</strong></p>`;
+
+  // Add strategy information
+  const strategyName = strategy === "last" ? "Last Subnet" : "First Subnet (.0)";
+  const strategyDescription = strategy === "last" ? "This method takes the last subnet from each subdivision, leaving the lower-numbered subnets available for future use." : "This method takes the first subnet (.0 network) from each subdivision, which is the traditional approach in VLSM.";
+
+  analysis += `<div class="alert alert-info mb-3">`;
+  analysis += `<h6 class="mb-2"><i class="fas fa-info-circle me-2"></i>Allocation Strategy: ${strategyName}</h6>`;
+  analysis += `<p class="mb-0">${strategyDescription}</p>`;
+  analysis += `</div>`;
+
   analysis += `<hr><h6 class="text-success"><strong>Solution:</strong></h6>`;
   analysis += `<p><em>Let n be the number of additional borrowed bits from parent network, m be the number of remaining host bits.</em></p>`;
 
@@ -362,7 +388,7 @@ export function generateDetailedAnalysis(baseNetwork, hostRequirements, results)
 
   try {
     // Use the same allocation logic to get steps
-    const { results: calculatedResults, allocationSteps } = performVLSMAllocation(baseNetwork, sortedRequirements);
+    const { results: calculatedResults, allocationSteps } = performVLSMAllocation(baseNetwork, sortedRequirements, strategy);
 
     // Generate analysis for each allocation step
     allocationSteps.forEach((step, stepIndex) => {
@@ -397,7 +423,8 @@ export function generateDetailedAnalysis(baseNetwork, hostRequirements, results)
         analysis += `<p class="mb-1"><strong>1) ${step.allSubnets[0].network} (assigned to Net ${networkNum})</strong></p>`;
         analysis += `</div>`;
       } else {
-        analysis += `<p class="mb-2"><strong>Take ${parentNetwork} and divide into ${numSubnets} subnets (/${targetCIDR}):</strong></p>`;
+        const strategyText = strategy === "last" ? " (using Last Subnet strategy)" : " (using First Subnet strategy)";
+        analysis += `<p class="mb-2"><strong>Take ${parentNetwork} and divide into ${numSubnets} subnets (/${targetCIDR})${strategyText}:</strong></p>`;
 
         // Use the subnets from the allocation step
         const allSubnets = step.allSubnets;
@@ -406,8 +433,9 @@ export function generateDetailedAnalysis(baseNetwork, hostRequirements, results)
         // Display all subnets, highlighting the assigned one
         allSubnets.forEach((subnet, subIndex) => {
           const isAssigned = subIndex === assignedSubnetIndex;
-          analysis += `<div class="ms-3 mb-2">`;
-          analysis += `<p class="mb-1"><strong>${subIndex + 1}) ${subnet.network}${isAssigned ? ` (assigned to Net ${networkNum})` : ""}</strong></p>`;
+          const assignmentStyle = isAssigned ? ' style="background-color: #e8f5e8; border-left: 4px solid #28a745;"' : "";
+          analysis += `<div class="ms-3 mb-2"${assignmentStyle}>`;
+          analysis += `<p class="mb-1"><strong>${subIndex + 1}) ${subnet.network}${isAssigned ? ` (✓ assigned to Net ${networkNum})` : ""}</strong></p>`;
 
           if (subnet.firstIP) {
             // Only show details if available
@@ -416,6 +444,7 @@ export function generateDetailedAnalysis(baseNetwork, hostRequirements, results)
             analysis += `<p class="mb-1">+ Last IP: ${subnet.lastIP}</p>`;
             analysis += `<p class="mb-1">+ Broadcast: ${subnet.broadcast}</p>`;
             analysis += `<p class="mb-1">+ Subnet Mask: ${subnet.subnetMask}</p>`;
+            analysis += `<p class="mb-1">+ Wildcard Mask: ${subnet.wildcardMask}</p>`;
             analysis += `</div>`;
           }
           analysis += `</div>`;
@@ -522,6 +551,7 @@ function generateSubnetDivision(parentNetwork, targetCIDR) {
     const firstIP = getFirstUsableIP(networkIP);
     const lastIP = getLastUsableIP(broadcastIP);
     const subnetMask = cidrToSubnetMask(targetCIDR);
+    const wildcardMask = cidrToWildcardMask(targetCIDR);
 
     subnets.push({
       network: `${networkIP}/${targetCIDR}`,
@@ -529,6 +559,7 @@ function generateSubnetDivision(parentNetwork, targetCIDR) {
       lastIP: `${lastIP}/${targetCIDR}`,
       broadcast: `${broadcastIP}/${targetCIDR}`,
       subnetMask: subnetMask,
+      wildcardMask: wildcardMask,
     });
 
     currentInt += subnetSize;
