@@ -359,8 +359,8 @@ export function generateDetailedAnalysis(baseNetwork, hostRequirements, results,
   analysis += `<p><strong>Find the first address, last address and broadcast address for each subnet?</strong></p>`;
 
   // Add strategy information
-  const strategyName = strategy === "last" ? "Last Subnet" : "First Subnet (.0)";
-  const strategyDescription = strategy === "last" ? "This method takes the last subnet from each subdivision, leaving the lower-numbered subnets available for future use." : "This method takes the first subnet (.0 network) from each subdivision, which is the traditional approach in VLSM.";
+  const strategyName = strategy === "last" ? "Last Subnet" : "First Subnet";
+  const strategyDescription = strategy === "last" ? "This method takes the last subnet from each subdivision, leaving the lower-numbered subnets available for future use." : "This method takes the first subnet from each subdivision, which is the traditional approach in VLSM.";
 
   analysis += `<div class="alert alert-info mb-3">`;
   analysis += `<h6 class="mb-2"><i class="fas fa-info-circle me-2"></i>Allocation Strategy: ${strategyName}</h6>`;
