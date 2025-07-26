@@ -1,6 +1,6 @@
 # Network Tools Suite
 
-A comprehensive web application for network administrators and engineers, featuring advanced IP address management, subnet calculations, and network analysis tools. Built with modern web technologies including React, TypeScript, and Vite.
+A comprehensive web application for network administrators and engineers, featuring advanced IP address management, subnet calculations, and network analysis tools. Built with modern web technologies including HTML5, CSS3, JavaScript ES6, and Bootstrap 5.
 
 ## 🌐 Live Demo
 
@@ -28,7 +28,7 @@ The Network Tools Suite is a powerful, browser-based application designed to sim
 - **Students & Educators**: Learn networking concepts with interactive tools
 - **IT Professionals**: Quick reference for network troubleshooting and design
 
-### � Key Benefits
+### ✨ Key Benefits
 
 - **No Installation Required**: Browser-based tools accessible anywhere
 - **Real-time Calculations**: Instant results with interactive interfaces
@@ -38,67 +38,41 @@ The Network Tools Suite is a powerful, browser-based application designed to sim
 
 ## 🚀 Technology Stack
 
-- **React 18** - Modern UI library with hooks and functional components
-- **TypeScript** - Type-safe JavaScript for better development experience
-- **Vite** - Lightning-fast build tool and development server
-- **Tailwind CSS** - Utility-first CSS framework for rapid styling
-- **Bootstrap 5** - Additional UI components and responsive grid
-- **Lucide React** - Beautiful and consistent icon library
-- **ESLint** - Code quality and consistency enforcement
+- **HTML5** - Modern semantic markup and structure
+- **CSS3** - Advanced styling with custom properties and animations
+- **JavaScript ES6+** - Modern JavaScript with modules and async/await
+- **Bootstrap 5** - Responsive UI framework and components
+- **Font Awesome** - Professional icon library
+- **GitHub Pages** - Free static site hosting and deployment
 
 ## 📋 System Requirements
 
-- **Node.js** (version 16 or higher)
-- **npm** or **yarn** package manager
-- **Git** for version control
-- **Modern web browser** (Chrome, Firefox, Safari, Edge)
+- **Modern Web Browser** (Chrome, Firefox, Safari, Edge)
+- **Internet Connection** (for CDN resources)
+- **No installation required** - runs entirely in the browser
 
 ## 🛠️ Installation & Setup
 
-### 1. Clone the Repository
+### Quick Start (Recommended)
 
-```bash
-git clone https://github.com/Glasspham/Support-Network.git
-cd Support-Network
-```
+Simply open the live demo: [https://glasspham.github.io/Support-Network/](https://glasspham.github.io/Support-Network/)
 
-### 2. Install Dependencies
+### Local Development
 
-```bash
-npm install
-```
+1. **Clone the repository**
 
-Or if you prefer yarn:
+   ```bash
+   git clone https://github.com/Glasspham/Support-Network.git
+   cd Support-Network
+   ```
 
-```bash
-yarn install
-```
-
-### 3. Start Development Server
-
-```bash
-npm run dev
-```
-
-Or with yarn:
-
-```bash
-yarn dev
-```
-
-The application will be available at `http://localhost:5173`
-
-### 4. Build for Production
-
-```bash
-npm run build
-```
-
-### 5. Preview Production Build
-
-```bash
-npm run preview
-```
+2. **Open in browser**
+   ```bash
+   # Simply open index.html in your browser
+   # Or use a local server
+   python -m http.server 8000
+   # Then visit http://localhost:8000
+   ```
 
 ### 6. Run Code Linting
 
@@ -134,38 +108,24 @@ npm run deploy
 ## 📁 Project Structure
 
 ```
-├── js/                  # Core networking logic modules
-│   ├── binaryMap.js     # Binary/decimal conversion utilities
-│   ├── ipAggregator.js  # IP aggregation and supernetting logic
-│   ├── ipChecker.js     # IP address validation and analysis
-│   ├── uiHandler.js     # User interface event handlers
-│   └── vlsmLogic.js     # VLSM calculation algorithms
-├── src/                 # React TypeScript source code
-│   ├── App.tsx          # Main application component
-│   ├── main.tsx         # Application entry point
-│   ├── index.css        # Global styles and Tailwind imports
-│   └── vite-env.d.ts    # TypeScript environment declarations
-├── .gitignore           # Git ignore file for excluding files from version control
-├── eslint.config.js     # ESLint configuration for code linting rules
-├── index.html           # HTML template with Bootstrap integration
-├── package-lock.json    # Auto-generated dependency lock file
-├── package.json         # Project dependencies and npm scripts
-├── postcss.config.js    # PostCSS configuration for Tailwind processing
-├── README.md            # Project documentation (this file)
-├── style.css            # Custom styles and component styling
-├── tailwind.config.js   # Tailwind CSS configuration and customization
-├── tsconfig.app.json    # TypeScript config for application code
-├── tsconfig.json        # Main TypeScript compiler configuration
-├── tsconfig.node.json   # TypeScript config for Node.js build tools
-└── vite.config.ts       # Vite bundler configuration and plugins
+
 ```
 
-## 🔧 Available Scripts
+├── js/ # Core networking logic modules
+│ ├── binaryMap.js # Binary/decimal conversion utilities
+│ ├── ipAggregator.js # IP aggregation and supernetting logic
+│ ├── ipChecker.js # IP address validation and analysis
+│ ├── uiHandler.js # User interface event handlers
+│ └── vlsmLogic.js # VLSM calculation algorithms
+├── .github/ # GitHub Actions workflow
+│ └── workflows/
+│ └── deploy.yml # Automated GitHub Pages deployment
+├── .gitignore # Git ignore file
+├── index.html # Main HTML file with Bootstrap integration
+├── README.md # Project documentation (this file)
+└── style.css # Custom styles and responsive design
 
-- `npm run dev` - Start development server with hot reload
-- `npm run build` - Create optimized production build
-- `npm run preview` - Preview production build locally
-- `npm run lint` - Run ESLint for code quality checks
+````
 
 ## 🌟 Key Features & Modules
 
@@ -217,7 +177,7 @@ npm install
 Remove-Item -Recurse -Force node_modules
 Remove-Item package-lock.json
 npm install
-```
+````
 
 ## 📝 Development Workflow
 
