@@ -107,25 +107,23 @@ npm run deploy
 
 ## 📁 Project Structure
 
-```
 
-```
-
-├── js/ # Core networking logic modules
-│ ├── binaryMap.js # Binary/decimal conversion utilities
+```bash
+root
+├── js/               # Core networking logic modules
+│ ├── binaryMap.js    # Binary/decimal conversion utilities
 │ ├── ipAggregator.js # IP aggregation and supernetting logic
-│ ├── ipChecker.js # IP address validation and analysis
-│ ├── uiHandler.js # User interface event handlers
-│ └── vlsmLogic.js # VLSM calculation algorithms
-├── .github/ # GitHub Actions workflow
+│ ├── ipChecker.js    # IP address validation and analysis
+│ ├── uiHandler.js    # User interface event handlers
+│ └── vlsmLogic.js    # VLSM calculation algorithms
+├── .github/          # GitHub Actions workflow
 │ └── workflows/
-│ └── deploy.yml # Automated GitHub Pages deployment
-├── .gitignore # Git ignore file
-├── index.html # Main HTML file with Bootstrap integration
-├── README.md # Project documentation (this file)
-└── style.css # Custom styles and responsive design
-
-````
+│ └── deploy.yml      # Automated GitHub Pages deployment
+├── .gitignore        # Git ignore file
+├── index.html        # Main HTML file with Bootstrap integration
+├── README.md         # Project documentation (this file)
+└── style.css         # Custom styles and responsive design
+```
 
 ## 🌟 Key Features & Modules
 
