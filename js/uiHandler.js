@@ -5,6 +5,7 @@
 import { calculateVLSM, validateCIDR, generateDetailedAnalysis } from "./vlsmLogic.js";
 import { checkIPAssignability, validateIP } from "./ipChecker.js";
 import { aggregateIPs, analyzeAggregation } from "./ipAggregator.js";
+import { convertToAllBases, getInputHelp, validateNumber } from "./numberConverter.js";
 
 class UIHandler {
   constructor() {
@@ -20,7 +21,7 @@ class UIHandler {
     this.setupIPAggregatorForm();
     this.setupDynamicSubnets();
     this.setupViewModeToggle();
-    this.setupThemeToggle();
+    this.setupNumberConverter();
   }
 
   setupNavigation() {
@@ -197,8 +198,7 @@ class UIHandler {
         }
 
         if (feedbackMessage) {
-          if(baseCIDRNum < 1 || baseCIDRNum > 32)
-            baseNetworkInput.classList.add(feedbackClass);
+          if (baseCIDRNum < 1 || baseCIDRNum > 32) baseNetworkInput.classList.add(feedbackClass);
           const feedback = document.createElement("div");
           feedback.className = `validation-feedback ${feedbackClass === "is-invalid" ? "invalid" : "warning"}-feedback d-block`;
           feedback.innerHTML = feedbackMessage;
@@ -718,55 +718,138 @@ class UIHandler {
     }
   }
 
-  setupThemeToggle() {
-    // Check for saved theme preference or default to light mode
-    const savedTheme = localStorage.getItem("theme") || "light";
-    this.setTheme(savedTheme);
+  setupNumberConverter() {
+    const inputBase = document.getElementById("input-base");
+    const inputNumber = document.getElementById("input-number");
+    const exampleButtons = document.querySelectorAll(".example-btn");
 
-    // Theme toggle button event listener
-    const themeToggle = document.getElementById("theme-toggle");
-    if (themeToggle) {
-      themeToggle.addEventListener("click", () => {
-        const currentTheme = document.documentElement.getAttribute("data-theme");
-        const newTheme = currentTheme === "dark" ? "light" : "dark";
-        this.setTheme(newTheme);
-      });
-    }
-  }
-
-  setTheme(theme) {
-    // Set theme attribute on document element
-    document.documentElement.setAttribute("data-theme", theme);
-
-    // Save theme preference
-    localStorage.setItem("theme", theme);
-
-    // Update body class for Bootstrap compatibility
-    if (theme === "dark") {
-      document.body.classList.remove("bg-light");
-      document.body.classList.add("bg-dark", "text-light");
-    } else {
-      document.body.classList.remove("bg-dark", "text-light");
-      document.body.classList.add("bg-light");
-    }
-
-    // Update Bootstrap components for dark mode
-    this.updateBootstrapComponentsForTheme(theme);
-  }
-
-  updateBootstrapComponentsForTheme(theme) {
-    // CHỈ thay đổi table thành dark mode, giữ nguyên TẤT CẢ màu khác
-    const tables = document.querySelectorAll(".table");
-    tables.forEach((table) => {
-      if (theme === "dark") {
-        table.classList.add("table-dark");
-      } else {
-        table.classList.remove("table-dark");
+    // Base selection change
+    inputBase.addEventListener("change", () => {
+      this.updateInputHelp();
+      this.clearResults();
+      // Auto convert if there's existing input
+      const value = inputNumber.value.trim();
+      if (value) {
+        setTimeout(() => this.convertNumber(), 100);
       }
     });
 
-    // KHÔNG thay đổi navbar, card headers, alerts - để CSS xử lý
-    // Giữ nguyên bg-info, bg-primary, và tất cả màu Bootstrap
+    // Input change - auto convert as user types
+    inputNumber.addEventListener("input", () => {
+      const value = inputNumber.value.trim();
+      if (value) {
+        // Show converting indicator
+        document.getElementById("converting-indicator").classList.remove("d-none");
+        setTimeout(() => {
+          this.convertNumber();
+          // Hide converting indicator
+          document.getElementById("converting-indicator").classList.add("d-none");
+        }, 300); // Debounce
+      } else {
+        this.clearResults();
+        document.getElementById("converting-indicator").classList.add("d-none");
+      }
+    });
+
+    // Example button clicks
+    exampleButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const value = button.getAttribute("data-value");
+        const base = button.getAttribute("data-base");
+
+        document.getElementById("input-base").value = base;
+        document.getElementById("input-number").value = value;
+
+        this.updateInputHelp();
+        this.convertNumber();
+      });
+    });
+
+    // Enter key support - focus to input for better UX
+    inputNumber.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        this.convertNumber();
+      }
+    });
+
+    // Initialize help text
+    this.updateInputHelp();
+  }
+
+  updateInputHelp() {
+    const base = parseInt(document.getElementById("input-base").value);
+    const inputNumber = document.getElementById("input-number");
+    const helpText = document.getElementById("input-help");
+
+    const help = getInputHelp(base);
+    inputNumber.placeholder = help.placeholder;
+    helpText.textContent = help.help;
+
+    // Clear input if current value is invalid for new base
+    const currentValue = inputNumber.value.trim();
+    if (currentValue && !validateNumber(currentValue, base)) {
+      inputNumber.value = "";
+      this.clearResults();
+    }
+  }
+
+  convertNumber() {
+    const inputBase = parseInt(document.getElementById("input-base").value);
+    const inputNumber = document.getElementById("input-number").value.trim();
+    const inputElement = document.getElementById("input-number");
+
+    const resultsDiv = document.getElementById("conversion-results");
+    const errorDiv = document.getElementById("conversion-error");
+
+    // Hide previous results/errors
+    resultsDiv.classList.add("d-none");
+    errorDiv.classList.add("d-none");
+
+    if (!inputNumber) {
+      // Remove validation classes
+      inputElement.classList.remove("is-valid", "is-invalid");
+      return;
+    }
+
+    // Convert using the number converter module
+    const result = convertToAllBases(inputNumber, inputBase);
+
+    if (result.success) {
+      // Display results
+      document.getElementById("result-decimal").value = result.decimal;
+      document.getElementById("result-binary").value = result.binary;
+      document.getElementById("result-hex").value = result.hexadecimal;
+      document.getElementById("result-octal").value = result.octal;
+
+      // Add success styling
+      inputElement.classList.remove("is-invalid");
+      inputElement.classList.add("is-valid");
+
+      resultsDiv.classList.remove("d-none");
+      resultsDiv.classList.add("fade-in");
+    } else {
+      // Display error
+      document.getElementById("error-message").textContent = result.error;
+
+      // Add error styling
+      inputElement.classList.remove("is-valid");
+      inputElement.classList.add("is-invalid");
+
+      errorDiv.classList.remove("d-none");
+      errorDiv.classList.add("fade-in");
+    }
+  }
+
+  clearResults() {
+    const resultsDiv = document.getElementById("conversion-results");
+    const errorDiv = document.getElementById("conversion-error");
+    const inputElement = document.getElementById("input-number");
+
+    resultsDiv.classList.add("d-none");
+    errorDiv.classList.add("d-none");
+
+    // Remove validation classes
+    inputElement.classList.remove("is-valid", "is-invalid");
   }
 }
 

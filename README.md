@@ -17,6 +17,7 @@ The Network Tools Suite is a powerful, browser-based application designed to sim
 - **VLSM (Variable Length Subnet Masking) Calculator**: Advanced subnet calculations with custom subnet sizes
 - **IP Address Validation & Analysis**: Comprehensive IP address checking and validation tools
 - **IP Aggregation & Supernetting**: Automatic route summarization and network aggregation
+- **Number Conversion Suite**: Convert between CIDR, subnet masks, wildcard masks, and calculate host counts
 - **Binary/Decimal Conversion**: Convert between different number representations for networking
 - **Subnet Planning**: Plan and optimize network topologies with intelligent subnet allocation
 - **Network Range Analysis**: Analyze IP ranges, calculate usable hosts, and determine network boundaries
@@ -68,17 +69,13 @@ Simply open the live demo: [https://glasspham.github.io/Support-Network/](https:
 
 2. **Open in browser**
    ```bash
-   # Simply open index.html in your browser
-   # Or use a local server
-   python -m http.server 8000
-   # Then visit http://localhost:8000
+   Note: use vscode
+   1. Install Live Server extension.
+   2. Open the index.html page.
+   3. Right click.
+   4. Select Open with Live Server
+   If you use File Explorer, click directly on index.html
    ```
-
-### 6. Run Code Linting
-
-```bash
-npm run lint
-```
 
 ## 🚀 Deployment
 
@@ -93,36 +90,24 @@ The project includes GitHub Actions workflow for automatic deployment:
 3. **Deploy** - Files are deployed to GitHub Pages
 4. **Live site** - Available at the GitHub Pages URL
 
-### Manual Deployment
-
-To deploy manually:
-
-```bash
-# Build the project
-npm run build
-
-# Deploy to GitHub Pages (if you have gh-pages package)
-npm run deploy
-```
-
 ## 📁 Project Structure
-
 
 ```bash
 root
-├── js/               # Core networking logic modules
-│ ├── binaryMap.js    # Binary/decimal conversion utilities
-│ ├── ipAggregator.js # IP aggregation and supernetting logic
-│ ├── ipChecker.js    # IP address validation and analysis
-│ ├── uiHandler.js    # User interface event handlers
-│ └── vlsmLogic.js    # VLSM calculation algorithms
-├── .github/          # GitHub Actions workflow
+├── js/                   # Core networking logic modules
+│ ├── binaryMap.js        # Binary/decimal conversion utilities
+│ ├── ipAggregator.js     # IP aggregation and supernetting logic
+│ ├── ipChecker.js        # IP address validation and analysis
+│ ├── uiHandler.js        # User interface event handlers
+│ ├── vlsmLogic.js        # VLSM calculation algorithms
+│ └── numberConverter.js  # Multi-base number conversion (Binary, Octal, Decimal, Hex)
+├── .github/              # GitHub Actions workflow
 │ └── workflows/
-│ └── deploy.yml      # Automated GitHub Pages deployment
-├── .gitignore        # Git ignore file
-├── index.html        # Main HTML file with Bootstrap integration
-├── README.md         # Project documentation (this file)
-└── style.css         # Custom styles and responsive design
+│ └── deploy.yml          # Automated GitHub Pages deployment
+├── .gitignore            # Git ignore file
+├── index.html            # Main HTML file with Bootstrap integration
+├── README.md             # Project documentation (this file)
+└── style.css             # Custom styles and responsive design
 ```
 
 ## 🌟 Key Features & Modules
@@ -155,39 +140,9 @@ root
 - Wildcard mask calculations
 - Network address calculations
 
-## 🔍 Troubleshooting
+### 🔢 Multi-Base Number Converter (`numberConverter.js`)
 
-### Common Issues:
-
-1. **Port Already in Use**: If port 5173 is occupied, Vite will automatically select another available port
-2. **Module Not Found**: Run `npm install` to reinstall dependencies
-3. **TypeScript Errors**: Check `tsconfig.json` configuration and ensure all type definitions are installed
-4. **Build Failures**: Clear cache and reinstall dependencies
-
-### Reset Project Dependencies:
-
-```bash
-# Remove node_modules and reinstall
-rm -rf node_modules package-lock.json
-npm install
-
-# Or on Windows PowerShell
-Remove-Item -Recurse -Force node_modules
-Remove-Item package-lock.json
-npm install
-````
-
-## 📝 Development Workflow
-
-To start developing:
-
-1. Open terminal in project directory
-2. Run `npm run dev` to start development server
-3. Open browser at `http://localhost:5173`
-4. Edit files in `src/` directory for React components
-5. Edit files in `js/` directory for networking logic
-6. Changes will hot-reload automatically
-7. Use browser developer tools for debugging
+A comprehensive number base conversion tool supporting Binary, Octal, Decimal, and Hexadecimal.
 
 ## 🧪 Testing Network Calculations
 
@@ -228,7 +183,3 @@ We welcome contributions! Please follow these steps:
 - **Live Application**: [https://glasspham.github.io/Support-Network/](https://glasspham.github.io/Support-Network/)
 - **GitHub Repository**: [https://github.com/Glasspham/Support-Network](https://github.com/Glasspham/Support-Network)
 - **Issues & Feedback**: [GitHub Issues](https://github.com/Glasspham/Support-Network/issues)
-
----
-
-_Built with ❤️ using Vite + React + TypeScript for the networking community_
