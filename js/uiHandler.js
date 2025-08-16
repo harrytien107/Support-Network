@@ -589,7 +589,8 @@ class UIHandler {
                         <div class="result-item ip-result-success">
                             <div class="h4 mb-2">${result.aggregatedNetwork}</div>
                             <ul class="list-unstyled mb-0">
-                                <li><strong>Broadcast:</strong> ${result.broadcastAddress}</li>
+                                <li><strong>Subnet Mask:</strong> ${result.subnetMask}</li>
+                                <li><strong>Wildcard Mask:</strong> ${result.wildcardMask}</li>
                                 <li><strong>Common Prefix:</strong> /${result.commonPrefixLength}</li>
                             </ul>
                         </div>

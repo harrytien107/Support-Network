@@ -123,6 +123,27 @@ function findCommonPrefixLength(binaryStrings) {
 }
 
 /**
+ * Generate subnet mask from prefix length
+ * @param {number} prefixLength - CIDR prefix length
+ * @returns {string} - Subnet mask in dotted decimal notation
+ */
+function prefixToSubnetMask(prefixLength) {
+    const maskBinary = '1'.repeat(prefixLength).padEnd(32, '0');
+    return binaryToIP(maskBinary);
+}
+
+/**
+ * Calculate wildcard mask from subnet mask
+ * @param {string} subnetMask - Subnet mask in dotted decimal notation
+ * @returns {string} - Wildcard mask in dotted decimal notation
+ */
+function subnetMaskToWildcard(subnetMask) {
+    const octets = parseIP(subnetMask);
+    const wildcardOctets = octets.map(octet => 255 - octet);
+    return wildcardOctets.join('.');
+}
+
+/**
  * Aggregate multiple IP addresses to find their common supernet
  * @param {string[]} ipList - Array of IP addresses in CIDR notation
  * @returns {Object} - Aggregation result
@@ -167,10 +188,10 @@ export function aggregateIPs(ipList) {
         // Calculate statistics
         const totalHosts = Math.pow(2, 32 - commonPrefixLength);
         const usableHosts = Math.max(0, totalHosts - 2);
-        
-        // Calculate broadcast address
-        const broadcastBinary = firstBinary.substr(0, commonPrefixLength).padEnd(32, '1');
-        const broadcastAddress = binaryToIP(broadcastBinary);
+
+        // Thêm subnet mask và wildcard mask
+        const subnetMask = prefixToSubnetMask(commonPrefixLength);
+        const wildcardMask = subnetMaskToWildcard(subnetMask);
         
         return {
             success: true,
@@ -178,7 +199,8 @@ export function aggregateIPs(ipList) {
             networkAddresses,
             aggregatedNetwork: aggregatedCIDR,
             commonPrefixLength,
-            broadcastAddress,
+            subnetMask,
+            wildcardMask,
             totalHosts,
             usableHosts,
             binaryRepresentations: binaryNetworks.map((binary, index) => ({
