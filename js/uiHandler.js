@@ -22,6 +22,7 @@ class UIHandler {
     this.setupDynamicSubnets();
     this.setupViewModeToggle();
     this.setupNumberConverter();
+    this.switchTool(this.currentTool);
   }
 
   setupNavigation() {

@@ -46,6 +46,12 @@
                 Number Converter
               </a>
             </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#theory-tool" data-tool="theory">
+                <i class="fas fa-book me-1"></i>
+                Theory
+              </a>
+            </li>
           </ul>
         </div>
       </div>
@@ -53,6 +59,11 @@
 
     <!-- Main Content -->
     <div class="container py-4">
+      <!-- Theory Tool -->
+      <div id="theory-tool" class="tool-section" style="display: none;">
+        <!-- Content will be loaded here by theoryLoader.js -->
+      </div>
+
       <!-- VLSM Tool -->
       <div id="vlsm-tool" class="tool-section">
         <div class="row">
@@ -379,15 +390,6 @@
             </div>
           </div>
         </div>
-        <!-- <hr class="my-3 border-light opacity-25" />
-        <div class="row">
-          <div class="col-12 text-center small">
-            <p class="mb-0 text-light opacity-75">
-              &copy; 2025 Network Tools Suite. Built with
-              <i class="fas fa-heart text-danger mx-1"></i>
-              for AI and Glasspham.
-            </p>
-          </div> -->
         </div>
       </div>
     </footer>
@@ -395,5 +397,6 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module" src="js/uiHandler.js"></script>
+    <script type="module" src="js/theoryLoader.js"></script>
   </body>
 </html>
