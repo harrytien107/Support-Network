@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const ipGridContainer = document.getElementById("ip-grid-container");
     if (ipGridContainer) {
       const totalRows = 64;
-      let ipGridHTML = [...Array(7)].map((_, i) => `<div class="ip-grid-header">${Math.pow(2, 8 - (i + 1))}</div>`).join("");
+      let ipGridHTML = [...Array(7)].map((_, i) => `<div class="ip-grid-header">${Math.pow(2, 8 - i)}</div>`).join("");
 
       const columns = [
         { prefix: 24, subnets: 1, step: 256 },
