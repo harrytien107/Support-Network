@@ -6,6 +6,7 @@ import { calculateVLSM, validateCIDR, generateDetailedAnalysis } from "./vlsmLog
 import { checkIPAssignability, validateIP } from "./ipChecker.js";
 import { aggregateIPs, analyzeAggregation } from "./ipAggregator.js";
 import { convertToAllBases, getInputHelp, validateNumber } from "./numberConverter.js";
+import { initI18n, t, updatePageTranslations } from "./i18n.js";
 
 class UIHandler {
   constructor() {
@@ -15,6 +16,9 @@ class UIHandler {
   }
 
   init() {
+    // Initialize i18n first
+    initI18n();
+    
     this.setupNavigation();
     this.setupVLSMForm();
     this.setupIPCheckerForm();
@@ -23,6 +27,11 @@ class UIHandler {
     this.setupViewModeToggle();
     this.setupNumberConverter();
     this.switchTool(this.currentTool);
+    
+    // Listen for language changes
+    document.addEventListener('languageChanged', () => {
+      this.onLanguageChanged();
+    });
   }
 
   setupNavigation() {
@@ -111,10 +120,10 @@ class UIHandler {
     const div = document.createElement("div");
     div.className = "col-md-3 mb-3";
     div.innerHTML = `
-            <label class="form-label">Network ${this.subnetCount}</label>
+            <label class="form-label"><span data-i18n="vlsm_network">${t('vlsm_network')}</span> ${this.subnetCount}</label>
             <div class="input-group">
                 <input type="number" class="form-control subnet-hosts" placeholder="${this.subnetCount}" min="1" max="65534">
-                <button type="button" class="btn btn-outline-danger btn-sm remove-subnet" title="Remove">
+                <button type="button" class="btn btn-outline-danger btn-sm remove-subnet" title="${t('remove')}">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -126,6 +135,18 @@ class UIHandler {
     div.querySelector(".remove-subnet").addEventListener("click", () => {
       div.remove();
     });
+  }
+  
+  onLanguageChanged() {
+    // Update select options
+    const selectOptions = document.querySelectorAll('select option[data-i18n]');
+    selectOptions.forEach(option => {
+      const key = option.getAttribute('data-i18n');
+      option.textContent = t(key);
+    });
+    
+    // Re-render any visible results with new language
+    // This ensures dynamically generated content is updated
   }
 
   // Performance check for detailed analysis
@@ -185,16 +206,16 @@ class UIHandler {
         let feedbackClass = "";
 
         if (baseCIDRNum < 1 || baseCIDRNum > 32) {
-          feedbackMessage = "⚠️ CIDR must be between 1 and 32. Please enter a valid CIDR notation.";
+          feedbackMessage = t('warning_cidr_range');
           feedbackClass = "is-invalid";
         } else if (baseCIDRNum < 8) {
-          feedbackMessage = "⚠️ Networks larger than (smaller than /8) will take quite a while to process for performance reasons.";
+          feedbackMessage = t('warning_large_network');
           feedbackClass = "is-invalid";
         } else if (baseCIDRNum < 16) {
-          feedbackMessage = "⚠️ Large networks (smaller than /16) will have disabled detailed analysis for performance reasons.";
+          feedbackMessage = t('warning_large_network_limited');
           feedbackClass = "is-warning";
         } else if (baseCIDRNum < 20) {
-          feedbackMessage = "⚠️ Large networks (smaller than /20) may have limited detailed analysis.";
+          feedbackMessage = t('warning_large_network_may_limit');
           feedbackClass = "is-warning";
         }
 
@@ -231,13 +252,13 @@ class UIHandler {
       let originalText = "";
       if (submitBtn) {
         originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<span class="loading"></span> Calculating...';
+        submitBtn.innerHTML = `<span class="loading"></span> ${t('calculating')}`;
         submitBtn.disabled = true;
       }
 
       // Validate base network
       if (!validateCIDR(baseNetwork)) {
-        throw new Error("Invalid base network format. Please use CIDR notation (e.g., 192.168.1.0/24)");
+        throw new Error(t('error_invalid_base_network'));
       }
 
       // Additional validation for CIDR range
@@ -245,7 +266,7 @@ class UIHandler {
       const baseCIDRNum = parseInt(baseCIDR);
 
       if (isNaN(baseCIDRNum) || baseCIDRNum < 1 || baseCIDRNum > 32) {
-        throw new Error("Invalid CIDR value. CIDR must be a number between 1 and 32.");
+        throw new Error(t('error_invalid_cidr'));
       }
 
       // Collect host requirements
@@ -258,14 +279,14 @@ class UIHandler {
       });
 
       if (hostRequirements.length === 0) {
-        throw new Error("Please specify at least one host requirement");
+        throw new Error(t('error_no_host_requirements'));
       }
 
       // Check for host requirements that are too large
       const maxHosts = Math.max(...hostRequirements);
       if (maxHosts > 16777214) {
         // Maximum hosts for /8 network
-        throw new Error(`Host requirement too large: ${maxHosts}. Maximum supported is 16,777,214 hosts.`);
+        throw new Error(`${t('error_host_too_large')}: ${maxHosts}. ${t('error_max_hosts')}`);
       }
 
       // Warn about performance for very large host requirements
@@ -305,13 +326,13 @@ class UIHandler {
     // Recreate the entire results structure to ensure it's clean
     resultsDiv.innerHTML = `
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="text-primary mb-0"><i class="fas fa-check-circle me-2"></i>Subnetting Results</h5>
+        <h5 class="text-primary mb-0"><i class="fas fa-check-circle me-2"></i>${t('vlsm_results')}</h5>
         <div class="btn-group" role="group">
           <input type="radio" class="btn-check" name="viewMode" id="table-view" value="table" checked />
-          <label class="btn btn-outline-primary btn-sm" for="table-view"> <i class="fas fa-table me-1"></i>Table View </label>
+          <label class="btn btn-outline-primary btn-sm" for="table-view"> <i class="fas fa-table me-1"></i>${t('vlsm_table_view')} </label>
           <input type="radio" class="btn-check" name="viewMode" id="detailed-view" value="detailed" ${!detailedAnalysisCheck.generate ? "disabled" : ""} />
           <label class="btn btn-outline-primary btn-sm ${!detailedAnalysisCheck.generate ? "disabled" : ""}" for="detailed-view"> 
-            <i class="fas fa-list-alt me-1"></i>Detailed Analysis ${!detailedAnalysisCheck.generate ? "(Disabled)" : ""}
+            <i class="fas fa-list-alt me-1"></i>${t('vlsm_detailed_view')} ${!detailedAnalysisCheck.generate ? "(Disabled)" : ""}
           </label>
         </div>
       </div>
@@ -322,14 +343,14 @@ class UIHandler {
           <table class="table table-hover">
             <thead class="table-primary">
               <tr>
-                <th>Network</th>
-                <th>IP Network</th>
-                <th>First IP</th>
-                <th>Last IP</th>
-                <th>Broadcast</th>
-                <th>Subnet Mask</th>
-                <th>Wildcard Mask</th>
-                <th>Usable Hosts</th>
+                <th>${t('vlsm_network')}</th>
+                <th>${t('vlsm_ip_network')}</th>
+                <th>${t('vlsm_first_ip')}</th>
+                <th>${t('vlsm_last_ip')}</th>
+                <th>${t('vlsm_broadcast')}</th>
+                <th>${t('vlsm_subnet_mask')}</th>
+                <th>${t('vlsm_wildcard_mask')}</th>
+                <th>${t('vlsm_usable_hosts')}</th>
               </tr>
             </thead>
             <tbody id="vlsm-table-body"></tbody>
@@ -353,7 +374,7 @@ class UIHandler {
 
       row.innerHTML = `
                 <td>
-                  <strong class="text-primary">Network ${subnet.networkNumber}</strong>
+                  <strong class="text-primary">${t('vlsm_network')} ${subnet.networkNumber}</strong>
                   <span class="badge bg-info">${subnet.requiredHosts}</span>
                 </td>
                 <td><strong>${subnet.network}</strong></td>
@@ -383,12 +404,12 @@ class UIHandler {
           <div class="alert alert-warning">
             <h6 class="alert-heading">
               <i class="fas fa-exclamation-triangle me-2"></i>
-              Detailed Analysis Disabled
+              ${t('vlsm_disabled_analysis')}
             </h6>
-            <p class="mb-0">${detailedAnalysisCheck.reason}</p>
+            <p class="mb-0">${t('vlsm_disabled_reason')}</p>
             <hr>
             <p class="mb-0 small">
-              <strong>Suggestion:</strong> Use a smaller base network (CIDR ≥ /20) or reduce the number of required hosts per subnet to enable detailed analysis.
+              <strong>${t('vlsm_suggestion')}:</strong> ${t('vlsm_suggestion_text')}
             </p>
           </div>
         `;
@@ -413,30 +434,30 @@ class UIHandler {
       // Show loading state
       const submitBtn = document.querySelector('#ip-checker-form button[type="submit"]');
       const originalText = submitBtn.innerHTML;
-      submitBtn.innerHTML = '<span class="loading"></span> Checking...';
+      submitBtn.innerHTML = `<span class="loading"></span> ${t('checking')}`;
       submitBtn.disabled = true;
 
       // Validate input
       if (!ipCidrInput) {
-        throw new Error("Please enter an IP address with CIDR notation");
+        throw new Error(t('error_ip_cidr_required'));
       }
 
       // Parse IP and CIDR
       const parts = ipCidrInput.split("/");
       if (parts.length !== 2) {
-        throw new Error("Please enter IP address in CIDR format (e.g., 192.168.10.50/24)");
+        throw new Error(t('error_ip_cidr_format'));
       }
 
       const ipAddress = parts[0].trim();
       const cidr = parts[1].trim();
 
       if (!validateIP(ipAddress)) {
-        throw new Error("Invalid IP address format");
+        throw new Error(t('error_invalid_ip'));
       }
 
       const cidrNum = parseInt(cidr);
       if (isNaN(cidrNum) || cidrNum < 1 || cidrNum > 32) {
-        throw new Error("Invalid CIDR notation. Must be between 1 and 32");
+        throw new Error(t('error_invalid_cidr_range'));
       }
 
       // Check IP assignability using CIDR
@@ -469,37 +490,37 @@ class UIHandler {
     const isAssignable = result.isAssignable;
     const alertClass = isAssignable ? "alert-info" : "alert-danger";
     const iconClass = isAssignable ? "fa-check-circle" : "fa-times-circle";
-    const statusText = isAssignable ? "Assignable" : "Not Assignable";
+    const statusText = isAssignable ? t('ip_checker_assignable') : t('ip_checker_not_assignable');
 
     resultsDiv.innerHTML = `
             <div class="alert ${alertClass} fade-in">
                 <h5 class="alert-heading">
                     <i class="fas ${iconClass} me-2"></i>
-                    IP Status: ${statusText}
+                    ${t('ip_checker_status')}: ${statusText}
                 </h5>
                 <p class="mb-3">${result.message}</p>
                 
                 <div class="row">
                     <div class="col-md-6">
                         <div class="result-item ${isAssignable ? "ip-result-success" : "ip-result-error"}">
-                            <h6><i class="fas fa-info-circle me-2"></i>IP Information</h6>
+                            <h6><i class="fas fa-info-circle me-2"></i>${t('ip_checker_ip_info')}</h6>
                             <ul class="list-unstyled mb-0">
-                                <li><strong>IP Address:</strong> ${result.ipAddress}</li>
-                                <li><strong>Subnet:</strong> ${result.networkAddress}/${result.cidr}</li>
-                                <li><strong>Subnet Mask:</strong> ${result.subnetInput.startsWith("/") || !isNaN(result.subnetInput) ? this.cidrToMask(result.cidr) : result.subnetInput}</li>
-                                <li><strong>Wildcard Mask:</strong> ${result.wildcardMask}</li>
+                                <li><strong>${t('ip_checker_ip_address')}:</strong> ${result.ipAddress}</li>
+                                <li><strong>${t('ip_checker_subnet')}:</strong> ${result.networkAddress}/${result.cidr}</li>
+                                <li><strong>${t('vlsm_subnet_mask')}:</strong> ${result.subnetInput.startsWith("/") || !isNaN(result.subnetInput) ? this.cidrToMask(result.cidr) : result.subnetInput}</li>
+                                <li><strong>${t('vlsm_wildcard_mask')}:</strong> ${result.wildcardMask}</li>
                             </ul>
                         </div>
                     </div>
                     
                     <div class="col-md-6">
                         <div class="result-item">
-                            <h6><i class="fas fa-network-wired me-2"></i>Subnet Details</h6>
+                            <h6><i class="fas fa-network-wired me-2"></i>${t('ip_checker_subnet_details')}</h6>
                             <ul class="list-unstyled mb-0">
-                                <li><strong>Network Address:</strong> ${result.networkAddress}</li>
-                                <li><strong>Broadcast Address:</strong> ${result.broadcastAddress}</li>
-                                <li><strong>Usable Range:</strong> ${result.firstUsableIP || "N/A"} - ${result.lastUsableIP || "N/A"}</li>
-                                <li><strong>Usable Hosts:</strong> <span class="badge bg-info">${result.usableHosts}</span></li>
+                                <li><strong>${t('ip_checker_network_address')}:</strong> ${result.networkAddress}</li>
+                                <li><strong>${t('ip_checker_broadcast_address')}:</strong> ${result.broadcastAddress}</li>
+                                <li><strong>${t('ip_checker_usable_range')}:</strong> ${result.firstUsableIP || "N/A"} - ${result.lastUsableIP || "N/A"}</li>
+                                <li><strong>${t('vlsm_usable_hosts')}:</strong> <span class="badge bg-info">${result.usableHosts}</span></li>
                             </ul>
                         </div>
                     </div>
@@ -524,13 +545,13 @@ class UIHandler {
       let originalText = "";
       if (submitBtn) {
         originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<span class="loading"></span> Aggregating...';
+        submitBtn.innerHTML = `<span class="loading"></span> ${t('aggregating')}`;
         submitBtn.disabled = true;
       }
 
       // Parse IP list
       if (!ipListText) {
-        throw new Error("Please enter at least one IP address");
+        throw new Error(t('error_at_least_one_ip'));
       }
 
       const ipList = ipListText
@@ -539,7 +560,7 @@ class UIHandler {
         .filter((line) => line.length > 0);
 
       if (ipList.length === 0) {
-        throw new Error("Please enter at least one valid IP address");
+        throw new Error(t('error_at_least_one_valid_ip'));
       }
 
       // Perform aggregation analysis
@@ -582,31 +603,31 @@ class UIHandler {
             <div class="alert ${efficiencyClass} fade-in">
                 <h5 class="alert-heading">
                     <i class="fas fa-layer-group me-2"></i>
-                    Aggregation Result
+                    ${t('ip_aggregator_result')}
                 </h5>
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <h6><i class="fas fa-network-wired me-2"></i>Aggregated Network</h6>
+                        <h6><i class="fas fa-network-wired me-2"></i>${t('ip_aggregator_aggregated_network')}</h6>
                         <div class="result-item ip-result-success">
                             <div class="h4 mb-2">${result.aggregatedNetwork}</div>
                             <ul class="list-unstyled mb-0">
-                                <li><strong>Subnet Mask:</strong> ${result.subnetMask}</li>
-                                <li><strong>Wildcard Mask:</strong> ${result.wildcardMask}</li>
-                                <li><strong>Common Prefix:</strong> /${result.commonPrefixLength}</li>
+                                <li><strong>${t('vlsm_subnet_mask')}:</strong> ${result.subnetMask}</li>
+                                <li><strong>${t('vlsm_wildcard_mask')}:</strong> ${result.wildcardMask}</li>
+                                <li><strong>${t('ip_aggregator_common_prefix')}:</strong> /${result.commonPrefixLength}</li>
                             </ul>
                         </div>
                     </div>
                     
                     <div class="col-md-6">
-                        <h6><i class="fas ${efficiencyIcon} me-2"></i>Efficiency Analysis</h6>
+                        <h6><i class="fas ${efficiencyIcon} me-2"></i>${t('ip_aggregator_efficiency')}</h6>
                         <div class="result-item">
                             <ul class="list-unstyled mb-0">
-                                <li><strong>Original Networks:</strong> ${analysis.originalNetworks}</li>
-                                <li><strong>Original Total Hosts:</strong> ${analysis.originalTotalHosts.toLocaleString()}</li>
-                                <li><strong>Efficiency:</strong> 
+                                <li><strong>${t('ip_aggregator_original_networks')}:</strong> ${analysis.originalNetworks}</li>
+                                <li><strong>${t('ip_aggregator_original_total_hosts')}:</strong> ${analysis.originalTotalHosts.toLocaleString()}</li>
+                                <li><strong>${t('ip_aggregator_efficiency_label')}:</strong> 
                                     <span class="badge ${isEfficient ? "bg-info" : "bg-warning"}">${Math.round(analysis.efficiency * 100)}%</span>
                                 </li>
-                                <li><strong>Wasted Addresses:</strong> 
+                                <li><strong>${t('ip_aggregator_wasted_addresses')}:</strong> 
                                     <span class="badge ${analysis.wastedAddresses === 0 ? "bg-info" : "bg-secondary"}">${analysis.wastedAddresses.toLocaleString()}</span>
                                 </li>
                             </ul>
@@ -617,16 +638,16 @@ class UIHandler {
             
             <div class="mt-4">
                 <h5 class="text-primary mb-3">
-                    <i class="fas fa-list me-2"></i>Input Networks Analysis
+                    <i class="fas fa-list me-2"></i>${t('ip_aggregator_input_networks')}
                 </h5>
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead class="table-info">
                             <tr>
-                                <th>Original Input</th>
-                                <th>Network Address</th>
-                                <th>Binary Representation</th>
-                                <th>Common Prefix</th>
+                                <th>${t('ip_aggregator_original_input')}</th>
+                                <th>${t('ip_aggregator_network_address')}</th>
+                                <th>${t('ip_aggregator_binary')}</th>
+                                <th>${t('ip_aggregator_common_prefix_label')}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -672,7 +693,7 @@ class UIHandler {
             <div class="alert alert-danger fade-in">
                 <h5 class="alert-heading">
                     <i class="fas fa-exclamation-triangle me-2"></i>
-                    Error
+                    ${t('error')}
                 </h5>
                 <p class="mb-0">${message}</p>
             </div>

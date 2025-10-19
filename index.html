@@ -15,7 +15,7 @@
       <div class="container">
         <a class="navbar-brand fw-bold" href="#">
           <i class="fas fa-network-wired me-2"></i>
-          Network Tools Suite
+          <span data-i18n="nav_title">Network Tools Suite</span>
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
           <span class="navbar-toggler-icon"></span>
@@ -25,31 +25,31 @@
             <li class="nav-item">
               <a class="nav-link active" href="#vlsm-tool" data-tool="vlsm">
                 <i class="fas fa-project-diagram me-1"></i>
-                Subnetting (VLSM)
+                <span data-i18n="nav_vlsm">Subnetting (VLSM)</span>
               </a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="#ip-checker-tool" data-tool="ip-checker">
                 <i class="fas fa-check-circle me-1"></i>
-                IP Checker
+                <span data-i18n="nav_ip_checker">IP Checker</span>
               </a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="#ip-aggregator-tool" data-tool="ip-aggregator">
                 <i class="fas fa-layer-group me-1"></i>
-                IP Summary
+                <span data-i18n="nav_ip_aggregator">IP Summary</span>
               </a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="#number-converter-tool" data-tool="number-converter">
                 <i class="fas fa-exchange-alt me-1"></i>
-                Number Converter
+                <span data-i18n="nav_number_converter">Number Converter</span>
               </a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="#theory-tool" data-tool="theory">
                 <i class="fas fa-book me-1"></i>
-                Theory
+                <span data-i18n="nav_theory">Theory</span>
               </a>
             </li>
           </ul>
@@ -72,56 +72,56 @@
               <div class="card-header bg-info text-white">
                 <h4 class="mb-0">
                   <i class="fas fa-project-diagram me-2"></i>
-                  VLSM Subnetting
+                  <span data-i18n="vlsm_title">VLSM Subnetting</span>
                 </h4>
-                <p class="mb-0 mt-2 opacity-80">Calculate Variable Length Subnet Masks for efficient IP allocation</p>
+                <p class="mb-0 mt-2 opacity-80" data-i18n="vlsm_description">Calculate Variable Length Subnet Masks for efficient IP allocation</p>
               </div>
               <div class="card-body">
                 <form id="vlsm-form">
                   <div class="row mb-4">
                     <div class="col-md-6">
-                      <label for="base-network" class="form-label fw-semibold"
-                        >Base Network (CIDR)
-                        <div class="form-text">Enter the base network in CIDR notation</div>
+                      <label for="base-network" class="form-label fw-semibold">
+                        <span data-i18n="vlsm_base_network">Base Network (CIDR)</span>
+                        <div class="form-text" data-i18n="vlsm_base_network_help">Enter the base network in CIDR notation</div>
                       </label>
                       <input type="text" class="form-control form-control-lg" id="base-network" placeholder="192.168.10.0/24" />
                     </div>
                     <div class="col-md-6">
                       <label for="subdivision-strategy" class="form-label fw-semibold">
-                        Subnet Allocation Strategy
-                        <div class="form-text">Choose how to allocate subnets during subdivision</div>
+                        <span data-i18n="vlsm_strategy">Subnet Allocation Strategy</span>
+                        <div class="form-text" data-i18n="vlsm_strategy_help">Choose how to allocate subnets during subdivision</div>
                       </label>
                       <select class="form-select form-select-lg" id="subdivision-strategy">
-                        <option value="first">Take the first subnet to assign - Traditional Method</option>
-                        <option value="last">Take the last subnet to assign - Alternative Method</option>
+                        <option value="first" data-i18n="vlsm_strategy_first">Take the first subnet to assign - Traditional Method</option>
+                        <option value="last" data-i18n="vlsm_strategy_last">Take the last subnet to assign - Alternative Method</option>
                       </select>
                     </div>
                   </div>
 
                   <div class="row mb-4">
                     <div class="col-12">
-                      <h5 class="text-primary mb-3">Host Requirements per Subnet</h5>
+                      <h5 class="text-primary mb-3" data-i18n="vlsm_host_requirements">Host Requirements per Subnet</h5>
                       <div class="row" id="subnet-inputs">
                         <div class="col-md-3 mb-3">
-                          <label class="form-label">Network 1</label>
+                          <label class="form-label"><span data-i18n="vlsm_network">Network</span> 1</label>
                           <input type="number" class="form-control subnet-hosts" placeholder="1" min="1" max="65534" />
                         </div>
                       </div>
-                      <button type="button" class="btn btn-outline-primary btn-sm" id="add-subnet"><i class="fas fa-plus me-1"></i>Add Another Subnet</button>
+                      <button type="button" class="btn btn-outline-primary btn-sm" id="add-subnet"><i class="fas fa-plus me-1"></i><span data-i18n="vlsm_add_subnet">Add Another Subnet</span></button>
                     </div>
                   </div>
 
-                  <button type="submit" class="btn btn-info text-white btn-lg"><i class="fas fa-calculator me-2"></i>Calculate</button>
+                  <button type="submit" class="btn btn-info text-white btn-lg"><i class="fas fa-calculator me-2"></i><span data-i18n="vlsm_calculate">Calculate</span></button>
                 </form>
 
                 <div id="vlsm-results" class="mt-4" style="display: none;">
                   <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="text-primary mb-0"><i class="fas fa-check-circle me-2"></i>Subnetting Results</h5>
+                    <h5 class="text-primary mb-0"><i class="fas fa-check-circle me-2"></i><span data-i18n="vlsm_results">Subnetting Results</span></h5>
                     <div class="btn-group" role="group">
                       <input type="radio" class="btn-check" name="viewMode" id="table-view" value="table" checked />
-                      <label class="btn btn-outline-primary btn-sm" for="table-view"> <i class="fas fa-table me-1"></i>Table View </label>
+                      <label class="btn btn-outline-primary btn-sm" for="table-view"> <i class="fas fa-table me-1"></i><span data-i18n="vlsm_table_view">Table View</span> </label>
                       <input type="radio" class="btn-check" name="viewMode" id="detailed-view" value="detailed" />
-                      <label class="btn btn-outline-primary btn-sm" for="detailed-view"> <i class="fas fa-list-alt me-1"></i>Detailed Analysis </label>
+                      <label class="btn btn-outline-primary btn-sm" for="detailed-view"> <i class="fas fa-list-alt me-1"></i><span data-i18n="vlsm_detailed_view">Detailed Analysis</span> </label>
                     </div>
                   </div>
 
@@ -131,14 +131,14 @@
                       <table class="table table-hover">
                         <thead class="table-primary">
                           <tr>
-                            <th>Network</th>
-                            <th>IP Network</th>
-                            <th>First IP</th>
-                            <th>Last IP</th>
-                            <th>Broadcast</th>
-                            <th>Subnet Mask</th>
-                            <th>Wildcard Mask</th>
-                            <th>Usable Hosts</th>
+                            <th data-i18n="vlsm_network">Network</th>
+                            <th data-i18n="vlsm_ip_network">IP Network</th>
+                            <th data-i18n="vlsm_first_ip">First IP</th>
+                            <th data-i18n="vlsm_last_ip">Last IP</th>
+                            <th data-i18n="vlsm_broadcast">Broadcast</th>
+                            <th data-i18n="vlsm_subnet_mask">Subnet Mask</th>
+                            <th data-i18n="vlsm_wildcard_mask">Wildcard Mask</th>
+                            <th data-i18n="vlsm_usable_hosts">Usable Hosts</th>
                           </tr>
                         </thead>
                         <tbody id="vlsm-table-body"></tbody>
@@ -165,23 +165,23 @@
               <div class="card-header bg-info text-white">
                 <h4 class="mb-0">
                   <i class="fas fa-check-circle me-2"></i>
-                  IP Checker
+                  <span data-i18n="ip_checker_title">IP Checker</span>
                 </h4>
-                <p class="mb-0 mt-2 opacity-80">Check if an IP address is assignable within a subnet</p>
+                <p class="mb-0 mt-2 opacity-80" data-i18n="ip_checker_description">Check if an IP address is assignable within a subnet</p>
               </div>
               <div class="card-body">
                 <form id="ip-checker-form">
                   <div class="row mb-4">
                     <div class="col-md-8">
-                      <label for="ip-cidr-input" class="form-label fw-semibold"
-                        >IP Address with CIDR
-                        <div class="form-text">Enter the IP address with CIDR notation (e.g., 192.168.10.50/24)</div>
+                      <label for="ip-cidr-input" class="form-label fw-semibold">
+                        <span data-i18n="ip_checker_input">IP Address with CIDR</span>
+                        <div class="form-text" data-i18n="ip_checker_input_help">Enter the IP address with CIDR notation (e.g., 192.168.10.50/24)</div>
                       </label>
                       <input type="text" class="form-control form-control-lg" id="ip-cidr-input" placeholder="192.168.10.50/24" />
                     </div>
                   </div>
 
-                  <button type="submit" class="btn btn-info text-white btn-lg"><i class="fas fa-search me-2"></i>Check</button>
+                  <button type="submit" class="btn btn-info text-white btn-lg"><i class="fas fa-search me-2"></i><span data-i18n="ip_checker_check">Check</span></button>
                 </form>
 
                 <div id="ip-checker-results" class="mt-4" style="display: none;"></div>
@@ -199,17 +199,17 @@
               <div class="card-header bg-info text-white">
                 <h4 class="mb-0">
                   <i class="fas fa-layer-group me-2"></i>
-                  IP Summary Tool
+                  <span data-i18n="ip_aggregator_title">IP Summary Tool</span>
                 </h4>
-                <p class="mb-0 mt-2 opacity-80">Find the common supernet for multiple IP addresses</p>
+                <p class="mb-0 mt-2 opacity-80" data-i18n="ip_aggregator_description">Find the common supernet for multiple IP addresses</p>
               </div>
               <div class="card-body">
                 <form id="ip-aggregator-form">
                   <div class="row mb-4">
                     <div class="col-12">
-                      <label for="ip-list" class="form-label fw-semibold"
-                        >IP Addresses (CIDR Notation)
-                        <div class="form-text">Enter each IP address with CIDR notation on a separate line (e.g., 192.168.10.0/28)</div>
+                      <label for="ip-list" class="form-label fw-semibold">
+                        <span data-i18n="ip_aggregator_input">IP Addresses (CIDR Notation)</span>
+                        <div class="form-text" data-i18n="ip_aggregator_input_help">Enter each IP address with CIDR notation on a separate line (e.g., 192.168.10.0/28)</div>
                       </label>
                       <textarea
                         class="form-control form-control-lg"
@@ -223,7 +223,7 @@
                     </div>
                   </div>
 
-                  <button type="submit" class="btn btn-info text-white btn-lg"><i class="fas fa-layer-group me-2"></i>Find</button>
+                  <button type="submit" class="btn btn-info text-white btn-lg"><i class="fas fa-layer-group me-2"></i><span data-i18n="ip_aggregator_find">Find</span></button>
                 </form>
 
                 <div id="ip-aggregator-results" class="mt-4" style="display: none;"></div>
@@ -241,31 +241,32 @@
               <div class="card-header bg-info text-white">
                 <h4 class="mb-0">
                   <i class="fas fa-exchange-alt me-2"></i>
-                  Number Base Converter
+                  <span data-i18n="number_converter_title">Number Base Converter</span>
                 </h4>
-                <p class="mb-0 mt-2 opacity-80">Convert numbers between Binary, Decimal, Hexadecimal, and Octal</p>
+                <p class="mb-0 mt-2 opacity-80" data-i18n="number_converter_description">Convert numbers between Binary, Decimal, Hexadecimal, and Octal</p>
               </div>
               <div class="card-body">
                 <div class="row">
                   <!-- Input Section -->
                   <div class="col-md-6">
                     <h5 class="mb-3">
-                      <i class="fas fa-keyboard me-2"></i>Input
+                      <i class="fas fa-keyboard me-2"></i><span data-i18n="number_converter_input">Input</span>
                     </h5>
                     
                     <div class="mb-3">
-                      <label for="input-base" class="form-label fw-semibold">From Base</label>
+                      <label for="input-base" class="form-label fw-semibold" data-i18n="number_converter_from_base">From Base</label>
                       <select class="form-select form-select-lg" id="input-base">
-                        <option value="10" selected>Decimal (Base 10)</option>
-                        <option value="2">Binary (Base 2)</option>
-                        <option value="16">Hexadecimal (Base 16)</option>
-                        <option value="8">Octal (Base 8)</option>
+                        <option value="10" selected data-i18n="number_converter_decimal">Decimal (Base 10)</option>
+                        <option value="2" data-i18n="number_converter_binary">Binary (Base 2)</option>
+                        <option value="16" data-i18n="number_converter_hex">Hexadecimal (Base 16)</option>
+                        <option value="8" data-i18n="number_converter_octal">Octal (Base 8)</option>
                       </select>
                     </div>
 
                     <div class="mb-3">
-                      <label for="input-number" class="form-label fw-semibold">Number to Convert
-                        <div class="form-text" id="input-help">Enter a decimal number (e.g., 255)</div>
+                      <label for="input-number" class="form-label fw-semibold">
+                        <span data-i18n="number_converter_number">Number to Convert</span>
+                        <div class="form-text" id="input-help" data-i18n="number_converter_number_help">Enter a decimal number (e.g., 255)</div>
                       </label>
                       <div class="position-relative">
                         <input 
@@ -277,7 +278,7 @@
                         />
                         <div class="position-absolute top-50 end-0 translate-middle-y me-3 d-none" id="converting-indicator">
                           <div class="spinner-border spinner-border-sm text-primary" role="status">
-                            <span class="visually-hidden">Converting...</span>
+                            <span class="visually-hidden" data-i18n="number_converter_converting">Converting...</span>
                           </div>
                         </div>
                       </div>
@@ -287,34 +288,34 @@
                   <!-- Output Section -->
                   <div class="col-md-6">
                     <h5 class="text-primary mb-3">
-                      <i class="fas fa-list me-2"></i>Results
+                      <i class="fas fa-list me-2"></i><span data-i18n="number_converter_results">Results</span>
                     </h5>
                     
                     <div id="conversion-results" class="d-none">
                       <div class="result-item mb-3">
                         <label class="form-label fw-semibold">
-                          <i class="fas fa-circle me-2 text-primary"></i>Decimal (Base 10)
+                          <i class="fas fa-circle me-2 text-primary"></i><span data-i18n="number_converter_decimal">Decimal (Base 10)</span>
                         </label>
                         <input type="text" class="form-control" id="result-decimal" readonly />
                       </div>
 
                       <div class="result-item mb-3">
                         <label class="form-label fw-semibold">
-                          <i class="fas fa-circle me-2 text-success"></i>Binary (Base 2)
+                          <i class="fas fa-circle me-2 text-success"></i><span data-i18n="number_converter_binary">Binary (Base 2)</span>
                         </label>
                         <input type="text" class="form-control" id="result-binary" readonly />
                       </div>
 
                       <div class="result-item mb-3">
                         <label class="form-label fw-semibold">
-                          <i class="fas fa-circle me-2 text-info"></i>Hexadecimal (Base 16)
+                          <i class="fas fa-circle me-2 text-info"></i><span data-i18n="number_converter_hex">Hexadecimal (Base 16)</span>
                         </label>
                         <input type="text" class="form-control" id="result-hex" readonly />
                       </div>
 
                       <div class="result-item mb-3">
                         <label class="form-label fw-semibold">
-                          <i class="fas fa-circle me-2 text-danger"></i>Octal (Base 8)
+                          <i class="fas fa-circle me-2 text-danger"></i><span data-i18n="number_converter_octal">Octal (Base 8)</span>
                         </label>
                         <input type="text" class="form-control" id="result-octal" readonly />
                       </div>
@@ -322,7 +323,7 @@
 
                     <div id="conversion-error" class="alert alert-danger d-none">
                       <h6 class="alert-heading">
-                        <i class="fas fa-exclamation-triangle me-2"></i>Error
+                        <i class="fas fa-exclamation-triangle me-2"></i><span data-i18n="number_converter_error">Error</span>
                       </h6>
                       <p class="mb-0" id="error-message">Invalid input</p>
                     </div>
@@ -333,7 +334,7 @@
                 <div class="row mt-4">
                   <div class="col-12">
                     <h5 class="text-warning mb-3">
-                      <i class="fas fa-lightbulb me-2"></i>Quick Examples
+                      <i class="fas fa-lightbulb me-2"></i><span data-i18n="number_converter_examples">Quick Examples</span>
                     </h5>
                     <div class="d-flex flex-wrap gap-2">
                       <button class="btn btn-outline-secondary btn-sm example-btn" data-value="255" data-base="10">
@@ -365,18 +366,18 @@
           <div class="col-md-6">
             <h5 class="mb-1 text-white">
               <i class="fas fa-network-wired me-2"></i>
-              Network Tools Suite
+              <span data-i18n="footer_title">Network Tools Suite</span>
             </h5>
-            <p class="mb-0 text-light opacity-75">Professional network calculation tools for efficient IP management</p>
+            <p class="mb-0 text-light opacity-75" data-i18n="footer_description">Professional network calculation tools for efficient IP management</p>
             <p class="mb-0 text-light opacity-75">
-              &copy; 2025 Network Tools Suite. Built with
+              &copy; 2025 Network Tools Suite. <span data-i18n="footer_copyright">Built with</span>
               <i class="fas fa-heart text-danger mx-1"></i>
-              for AI and Glasspham.
+              <span data-i18n="footer_for">for AI and Glasspham.</span>
             </p>
           </div>
           <div class="col-md-6 text-md-end">
             <div class="d-flex justify-content-md-end justify-content-start align-items-center">
-              <span class="me-3 text-white">Developed by</span>
+              <span class="me-3 text-white" data-i18n="footer_developed_by">Developed by</span>
               <a href="https://github.com/Glasspham" target="_blank" class="btn btn-outline-light btn-sm">
                 <i class="fab fa-github me-2"></i>
                 Glasspham
@@ -385,7 +386,7 @@
             <div class="mt-2 small">
               <a href="https://github.com/Glasspham/Support-Network" target="_blank" class="text-light text-decoration-none opacity-75">
                 <i class="fas fa-code me-1"></i>
-                Open source networking tools
+                <span data-i18n="footer_open_source">Open source networking tools</span>
               </a>
             </div>
           </div>
@@ -396,6 +397,7 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="js/i18n.js"></script>
     <script type="module" src="js/uiHandler.js"></script>
     <script type="module" src="js/theoryLoader.js"></script>
   </body>

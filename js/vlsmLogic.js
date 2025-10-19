@@ -3,6 +3,7 @@
  */
 
 import { cidrToSubnetMask, getUsableHosts, cidrToWildcardMask } from "./binaryMap.js";
+import { t } from "./i18n.js";
 
 /**
  * Parse IP address string to array of integers
@@ -344,31 +345,32 @@ export function generateDetailedAnalysis(baseNetwork, hostRequirements, results,
   const baseCIDRNum = parseInt(baseCIDR);
 
   let analysis = `<div class="detailed-vlsm">`;
-  analysis += `<h6 class="text-primary mb-3"><strong>VLSM Problem:</strong></h6>`;
-  analysis += `<p><strong>Using network:</strong> ${baseNetwork} design VLSM for the following networks:</p>`;
+  analysis += `<h6 class="text-primary mb-3"><strong>${t('vlsm_problem')}:</strong></h6>`;
+  analysis += `<p><strong>${t('vlsm_using_network')}:</strong> ${baseNetwork} ${t('vlsm_design_vlsm')}:</p>`;
   analysis += `<ul class="list-unstyled ms-3">`;
 
   // List all requirements
   hostRequirements.forEach((req, index) => {
     if (req && req > 0) {
-      analysis += `<li><strong>Net ${index + 1}:</strong> ${req} hosts</li>`;
+      analysis += `<li><strong>${t('vlsm_net')} ${index + 1}:</strong> ${req} ${t('hosts')}</li>`;
     }
   });
 
   analysis += `</ul>`;
-  analysis += `<p><strong>Find the first address, last address and broadcast address for each subnet?</strong></p>`;
+  analysis += `<p><strong>${t('vlsm_find_addresses')}</strong></p>`;
 
   // Add strategy information
-  const strategyName = strategy === "last" ? "Last Subnet" : "First Subnet";
+  const strategyName = strategy === "last" ? t('vlsm_strategy_last_subnet').split(' ')[2] + " " + t('vlsm_strategy_last_subnet').split(' ')[3] : t('vlsm_strategy_first_subnet').split(' ')[2] + " " + t('vlsm_strategy_first_subnet').split(' ')[3];
+  const strategyNameFull = strategy === "last" ? "Last Subnet" : "First Subnet";
   const strategyDescription = strategy === "last" ? "This method takes the last subnet from each subdivision, leaving the lower-numbered subnets available for future use." : "This method takes the first subnet from each subdivision, which is the traditional approach in VLSM.";
 
   analysis += `<div class="alert alert-info mb-3">`;
-  analysis += `<h6 class="mb-2"><i class="fas fa-info-circle me-2"></i>Allocation Strategy: ${strategyName}</h6>`;
+  analysis += `<h6 class="mb-2"><i class="fas fa-info-circle me-2"></i>Allocation Strategy: ${strategyNameFull}</h6>`;
   analysis += `<p class="mb-0">${strategyDescription}</p>`;
   analysis += `</div>`;
 
-  analysis += `<hr><h6 class="text-success"><strong>Solution:</strong></h6>`;
-  analysis += `<p><em>Let n be the number of additional borrowed bits from parent network, m be the number of remaining host bits.</em></p>`;
+  analysis += `<hr><h6 class="text-success"><strong>${t('vlsm_solution')}:</strong></h6>`;
+  analysis += `<p><em>${t('vlsm_borrowed_bits_note')}</em></p>`;
 
   // Prepare requirements in the same way as calculateVLSM
   const validRequirements = [];
@@ -401,30 +403,30 @@ export function generateDetailedAnalysis(baseNetwork, hostRequirements, results,
       const hostBits = 32 - targetCIDR;
 
       analysis += `<div class="mb-4 p-3 border rounded bg-white">`;
-      analysis += `<h6 class="text-info"><strong>Net ${networkNum}: ${requiredHosts} hosts</strong></h6>`;
+      analysis += `<h6 class="text-info"><strong>${t('vlsm_net')} ${networkNum}: ${requiredHosts} ${t('hosts')}</strong></h6>`;
 
       // Calculate borrowed bits from this parent
       const borrowedBits = targetCIDR - parentCIDR;
       const blockSize = Math.pow(2, hostBits);
       const numSubnets = Math.pow(2, borrowedBits);
 
-      analysis += `<p class="mb-2"><strong>Calculation:</strong></p>`;
+      analysis += `<p class="mb-2"><strong>${t('vlsm_calculation')}:</strong></p>`;
       analysis += `<div class="ms-3 mb-2">`;
-      analysis += `<p class="mb-1">Find m: 2<sup>m</sup> - 2 ≥ ${requiredHosts} ⇒ m = ${hostBits}</p>`;
-      analysis += `<p class="mb-1">Borrowed bits: n = ${parentCIDR} → ${targetCIDR} = ${borrowedBits}</p>`;
-      analysis += `<p class="mb-1">Block Size = 2<sup>${hostBits}</sup> = ${blockSize}</p>`;
-      analysis += `<p class="mb-1">Number of Subnets = 2<sup>${borrowedBits}</sup> = ${numSubnets}</p>`;
+      analysis += `<p class="mb-1">${t('vlsm_find_m')}: 2<sup>m</sup> - 2 ≥ ${requiredHosts} ⇒ m = ${hostBits}</p>`;
+      analysis += `<p class="mb-1">${t('vlsm_borrowed_bits')}: n = ${parentCIDR} → ${targetCIDR} = ${borrowedBits}</p>`;
+      analysis += `<p class="mb-1">${t('vlsm_block_size')} = 2<sup>${hostBits}</sup> = ${blockSize}</p>`;
+      analysis += `<p class="mb-1">${t('vlsm_number_subnets')} = 2<sup>${borrowedBits}</sup> = ${numSubnets}</p>`;
       analysis += `</div>`;
 
       // Special case: if borrowedBits is 0, it means direct assignment without subdivision
       if (borrowedBits === 0) {
-        analysis += `<p class="mb-2"><strong>Direct assignment (no subdivision needed):</strong></p>`;
+        analysis += `<p class="mb-2"><strong>${t('vlsm_direct_assignment')}:</strong></p>`;
         analysis += `<div class="ms-3 mb-2">`;
-        analysis += `<p class="mb-1"><strong>1) ${step.allSubnets[0].network} (assigned to Net ${networkNum})</strong></p>`;
+        analysis += `<p class="mb-1"><strong>1) ${step.allSubnets[0].network} (${t('vlsm_assigned_to')} ${t('vlsm_net')} ${networkNum})</strong></p>`;
         analysis += `</div>`;
       } else {
-        const strategyText = strategy === "last" ? " (using Last Subnet strategy)" : " (using First Subnet strategy)";
-        analysis += `<p class="mb-2"><strong>Take ${parentNetwork} and divide into ${numSubnets} subnets (/${targetCIDR})${strategyText}:</strong></p>`;
+        const strategyText = strategy === "last" ? ` (${t('vlsm_strategy_last_subnet')})` : ` (${t('vlsm_strategy_first_subnet')})`;
+        analysis += `<p class="mb-2"><strong>${t('vlsm_take_and_divide')} ${parentNetwork} ${t('vlsm_and_divide_into')} ${numSubnets} ${t('vlsm_subnets')} (/${targetCIDR})${strategyText}:</strong></p>`;
 
         // Use the subnets from the allocation step
         const allSubnets = step.allSubnets;
@@ -435,16 +437,16 @@ export function generateDetailedAnalysis(baseNetwork, hostRequirements, results,
           const isAssigned = subIndex === assignedSubnetIndex;
           const assignmentStyle = isAssigned ? ' style="background-color: #e8f5e8; border-left: 4px solid #28a745;"' : "";
           analysis += `<div class="ms-3 mb-2"${assignmentStyle}>`;
-          analysis += `<p class="mb-1"><strong>${subIndex + 1}) ${subnet.network}${isAssigned ? ` (✓ assigned to Net ${networkNum})` : ""}</strong></p>`;
+          analysis += `<p class="mb-1"><strong>${subIndex + 1}) ${subnet.network}${isAssigned ? ` (✓ ${t('vlsm_assigned_to')} ${t('vlsm_net')} ${networkNum})` : ""}</strong></p>`;
 
           if (subnet.firstIP) {
             // Only show details if available
             analysis += `<div class="ms-3">`;
-            analysis += `<p class="mb-1">+ First IP: ${subnet.firstIP}</p>`;
-            analysis += `<p class="mb-1">+ Last IP: ${subnet.lastIP}</p>`;
-            analysis += `<p class="mb-1">+ Broadcast: ${subnet.broadcast}</p>`;
-            analysis += `<p class="mb-1">+ Subnet Mask: ${subnet.subnetMask}</p>`;
-            analysis += `<p class="mb-1">+ Wildcard Mask: ${subnet.wildcardMask}</p>`;
+            analysis += `<p class="mb-1">+ ${t('vlsm_first_ip_label')}: ${subnet.firstIP}</p>`;
+            analysis += `<p class="mb-1">+ ${t('vlsm_last_ip_label')}: ${subnet.lastIP}</p>`;
+            analysis += `<p class="mb-1">+ ${t('vlsm_broadcast_label')}: ${subnet.broadcast}</p>`;
+            analysis += `<p class="mb-1">+ ${t('vlsm_subnet_mask_label')}: ${subnet.subnetMask}</p>`;
+            analysis += `<p class="mb-1">+ ${t('vlsm_wildcard_mask_label')}: ${subnet.wildcardMask}</p>`;
             analysis += `</div>`;
           }
           analysis += `</div>`;
